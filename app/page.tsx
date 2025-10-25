@@ -1,6 +1,9 @@
-import { getServerSession } from "next-auth";
+import { AppBar } from "./components/AppBar";
 
-export default async function Home() {
-  const session = await getServerSession();
-  return <div>{JSON.stringify(session?.user)}</div>;
+export default function Home() {
+  return (
+    <main>
+      <AppBar />
+    </main>
+  );
 }
