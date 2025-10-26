@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid()) // Use UUID for IDs
+  name          String
+  email         String         @unique // Email should be unique
+  password      String         // Store hashed passwords, not plain text!
+  joinedAt      DateTime       @default(now())
+}
