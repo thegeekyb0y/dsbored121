@@ -2,7 +2,7 @@
 import { useSession } from "next-auth/react";
 import TimerComp from "../components/TimerComp";
 
-export function Timer() {
+export default function Timer() {
   const session = useSession();
 
   return (
