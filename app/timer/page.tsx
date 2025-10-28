@@ -7,9 +7,11 @@ export default function Timer() {
 
   return (
     <div>
-      {session.data?.user && <TimerComp />}
-      {!session.data?.user && (
-        <button>Signin to save progress for stats</button>
+      <TimerComp />
+      {!session && (
+        <div className="mt-8 text-center text-gray-600">
+          <p>💡 Login to track your study sessions and see stats!</p>
+        </div>
       )}
     </div>
   );
