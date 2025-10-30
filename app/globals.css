@@ -10,16 +10,18 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-krakedgreen: #4a4d3d;
+  --color-krakedgreen: #053a0d;
   --color-krakedpurple: #413d4d;
   --color-krakedbg: #292727;
   --color-krakedlight: #cbcacd;
   --color-krakedyellow: #d89a42;
+  --color-krakedblue: #154162;
+  --color-krakedbrown: #053a0d;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #131212;
     --foreground: #ededed;
   }
 }

@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-const POMODORO_TIME = 25 * 60;
 
 interface PomodroState {
   timeLeft: number;
@@ -9,10 +8,12 @@ interface PomodroState {
   pauseTimer: () => void;
   resetTimer: () => void;
   formattedTime: string;
+  initialDuration: number;
 }
 
-export function useTimer(): PomodroState {
-  const [timeLeft, setTimeLeft] = useState(POMODORO_TIME);
+export function useTimer(durationMinutes: number = 25): PomodroState {
+  const INITIAL_TIME = durationMinutes * 60;
+  const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
   const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export function useTimer(): PomodroState {
   };
 
   const resetTimer = () => {
-    setTimeLeft(POMODORO_TIME);
+    setTimeLeft(INITIAL_TIME);
     setIsRunning(false);
   };
 
@@ -60,5 +61,6 @@ export function useTimer(): PomodroState {
     pauseTimer,
     resetTimer,
     formattedTime: formatTime(timeLeft),
+    initialDuration: INITIAL_TIME,
   };
 }

@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <main>
       <AppBar />
-      <div className="flex gap-2 justify-between">
+      <div className="flex gap-2 justify-between items-start">
         <Timer />
         <TestStopwatch />
       </div>
