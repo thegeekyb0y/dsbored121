@@ -53,14 +53,14 @@ export default function UnifiedTimer({ mode, onComplete }: UnifiedTimerProps) {
         {!isRunning ? (
           <button
             onClick={startTimer}
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg font-semibold text-lg"
+            className="bg-[#40c057] hover:bg-[#40c057]/80 border-2 border-krakedlight text-white px-8 py-4 rounded-lg font-semibold text-lg"
           >
             Start
           </button>
         ) : (
           <button
             onClick={pauseTimer}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white px-8 py-4 rounded-lg font-semibold text-lg"
+            className="bg-yellow-600 hover:bg-yellow-700 border-2 border-krakedlight text-white px-8 py-4 rounded-lg font-semibold text-lg"
           >
             Pause
           </button>
@@ -70,7 +70,7 @@ export default function UnifiedTimer({ mode, onComplete }: UnifiedTimerProps) {
           <button
             onClick={handleStop}
             disabled={!isRunning && stopwatch.elapsedSeconds === 0}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg disabled:bg-gray-600 disabled:cursor-not-allowed"
+            className="bg-blue-600 hover:bg-blue-700 border-2 border-krakedlight text-white px-8 py-4 rounded-lg font-semibold text-lg disabled:bg-gray-600 disabled:cursor-not-allowed"
           >
             Stop & Save
           </button>
@@ -78,7 +78,7 @@ export default function UnifiedTimer({ mode, onComplete }: UnifiedTimerProps) {
 
         <button
           onClick={resetTimer}
-          className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-4 rounded-lg font-semibold text-lg"
+          className="bg-gray-600 hover:bg-gray-700 border-2 border-krakedlight text-white px-8 py-4 rounded-lg font-semibold text-lg"
         >
           Reset
         </button>

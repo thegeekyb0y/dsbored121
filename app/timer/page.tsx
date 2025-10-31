@@ -68,7 +68,7 @@ export default function TimerPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="max-w-4xl mx-auto px-4 py-12 bg-krakedblue cursor-grab border-4 border-krakedlight rounded-xl">
       <h1 className="text-4xl font-bold text-center mb-8">Study Timer</h1>
 
       <div className="flex flex-col items-center">
@@ -90,7 +90,7 @@ export default function TimerPage() {
               <button
                 onClick={handleSubjectConfirm}
                 disabled={!subject}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold"
+                className="flex-1 bg-krakedblue2 hover:bg-krakedblue2/50 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold"
               >
                 Confirm
               </button>
@@ -108,7 +108,7 @@ export default function TimerPage() {
         {!timerActive ? (
           <button
             onClick={handleStartClick}
-            className="bg-green-600 hover:bg-green-700 text-white px-12 py-6 rounded-lg font-bold text-2xl"
+            className="bg-green-700 hover:bg-green-800 border-2 border-krakedlight text-white px-12 py-6 rounded-lg font-bold text-2xl"
           >
             Start Study Session
           </button>

@@ -17,6 +17,7 @@
   --color-krakedyellow: #d89a42;
   --color-krakedblue: #154162;
   --color-krakedbrown: #053a0d;
+  --color-krakedblue2: #3b82c6;
 }
 
 @media (prefers-color-scheme: dark) {
