@@ -1,12 +1,21 @@
 import prisma from "@/app/lib/prisma";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // ← Import authOptions
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions); // ← Pass authOptions
+
+    console.log("🔍 Session Debug:", {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userEmail: session?.user?.email,
+      userId: session?.user?.id,
+    });
 
     if (!session?.user?.email) {
+      console.log("❌ Unauthorized: No session or email");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -16,7 +25,7 @@ export async function POST(req: Request) {
     if (!duration || !tag) {
       return NextResponse.json(
         { error: "Missing duration or tag" },
-        { status: 400 } // Bad request
+        { status: 400 }
       );
     }
 
@@ -32,7 +41,6 @@ export async function POST(req: Request) {
     });
 
     if (!user) {
-      // User doesn't exist in DB (shouldn't happen, but safety check)
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
@@ -45,12 +53,18 @@ export async function POST(req: Request) {
       },
     });
 
+    console.log("✅ Session saved successfully:", {
+      sessionId: studySession.id,
+      duration: studySession.duration,
+      tag: studySession.tag,
+    });
+
     return NextResponse.json({
       success: true,
       session: studySession,
     });
   } catch (error) {
-    console.error("Error saving session:", error);
+    console.error("❌ Error saving session:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
