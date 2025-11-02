@@ -10,39 +10,39 @@ interface UnifiedTimerProps {
 }
 
 export default function UnifiedTimer({ mode, onComplete }: UnifiedTimerProps) {
-  // Stopwatch for Focus Mode
   const stopwatch = useStopwatch();
-
-  // Countdown for Pomodoro Mode (useTimer accepts an optional duration in minutes)
   const pomodoro = useTimer(25);
-
-  // call onComplete when pomodoro finishes (only once per cycle)
   const completionCalledRef = useRef(false);
 
+  // Auto-complete for Pomodoro when reaches 00:00
   useEffect(() => {
     if (mode !== "pomodoro") return;
 
-    // reset the flag when timer is reset or a new session starts
+    // Reset flag when timer is reset
     if (pomodoro.timeLeft === pomodoro.initialDuration) {
       completionCalledRef.current = false;
     }
 
+    // Call onComplete only once when timer finishes
     if (pomodoro.timeLeft === 0 && !completionCalledRef.current) {
       completionCalledRef.current = true;
       onComplete(pomodoro.initialDuration);
     }
   }, [mode, pomodoro.timeLeft, pomodoro.initialDuration, onComplete]);
 
-  // Use the appropriate timer based on mode
   const { formattedTime, isRunning, startTimer, pauseTimer, resetTimer } =
     mode === "focus" ? stopwatch : pomodoro;
 
-  // Stop button (only for Focus Mode)
   const handleStop = () => {
-    pauseTimer();
-    if (mode === "focus") {
-      onComplete(stopwatch.elapsedSeconds);
+    const durationToSave =
+      mode === "focus"
+        ? stopwatch.elapsedSeconds
+        : pomodoro.initialDuration - pomodoro.timeLeft;
+    if (mode === "pomodoro") {
+      completionCalledRef.current = true;
     }
+    onComplete(durationToSave);
+    resetTimer();
   };
 
   return (
@@ -66,15 +66,17 @@ export default function UnifiedTimer({ mode, onComplete }: UnifiedTimerProps) {
           </button>
         )}
 
-        {mode === "focus" && (
-          <button
-            onClick={handleStop}
-            disabled={!isRunning && stopwatch.elapsedSeconds === 0}
-            className="bg-blue-600 hover:bg-blue-700 border-2 border-krakedlight text-white px-8 py-4 rounded-lg font-semibold text-lg disabled:bg-gray-600 disabled:cursor-not-allowed"
-          >
-            Stop & Save
-          </button>
-        )}
+        <button
+          onClick={handleStop}
+          disabled={
+            (mode === "focus" && stopwatch.elapsedSeconds === 0) ||
+            (mode === "pomodoro" &&
+              pomodoro.timeLeft === pomodoro.initialDuration)
+          }
+          className="bg-blue-600 hover:bg-blue-700 border-2 border-krakedlight text-white px-8 py-4 rounded-lg font-semibold text-lg disabled:bg-gray-600 disabled:cursor-not-allowed"
+        >
+          Stop & Save
+        </button>
 
         <button
           onClick={resetTimer}

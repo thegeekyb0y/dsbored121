@@ -1,21 +1,13 @@
 import prisma from "@/app/lib/prisma";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // ← Import authOptions
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions); // ← Pass authOptions
-
-    console.log("🔍 Session Debug:", {
-      hasSession: !!session,
-      hasUser: !!session?.user,
-      userEmail: session?.user?.email,
-      userId: session?.user?.id,
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      console.log("❌ Unauthorized: No session or email");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useRef } from "react";
 
 interface PomodroState {
   timeLeft: number;
@@ -11,39 +12,61 @@ interface PomodroState {
   initialDuration: number;
 }
 
-export function useTimer(durationMinutes: number = 25): PomodroState {
+export function useTimer(
+  durationMinutes: number = 25,
+  onComplete?: (seconds: number) => void
+): PomodroState {
   const INITIAL_TIME = durationMinutes * 60;
   const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
   const [isRunning, setIsRunning] = useState(false);
+  const endTimeRef = useRef<number>(0);
+  const pausedTimeRef = useRef<number>(INITIAL_TIME);
+  const completedRef = useRef(false);
 
   useEffect(() => {
     if (isRunning) {
+      // Calculate when timer should end
+      endTimeRef.current = Date.now() + pausedTimeRef.current * 1000;
+
       const interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            setIsRunning(false);
-            return 0;
+        const now = Date.now();
+        const remaining = Math.max(
+          0,
+          Math.ceil((endTimeRef.current - now) / 1000)
+        );
+
+        setTimeLeft(remaining);
+
+        if (remaining === 0) {
+          setIsRunning(false);
+          if (onComplete && !completedRef.current) {
+            completedRef.current = true;
+            onComplete(INITIAL_TIME);
           }
-          return prev - 1;
-        });
-      }, 1000);
+        }
+      }, 100);
+
       return () => {
         clearInterval(interval);
       };
     }
-  }, [isRunning]);
+  }, [isRunning, onComplete, INITIAL_TIME]);
 
   const startTimer = () => {
+    completedRef.current = false;
     setIsRunning(true);
   };
 
   const pauseTimer = () => {
     setIsRunning(false);
+    pausedTimeRef.current = timeLeft;
   };
 
   const resetTimer = () => {
     setTimeLeft(INITIAL_TIME);
     setIsRunning(false);
+    pausedTimeRef.current = INITIAL_TIME;
+    completedRef.current = false;
   };
 
   const formatTime = (seconds: number): string => {
