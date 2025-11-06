@@ -53,10 +53,12 @@ export default function NewRoomPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg bg-krakedblue border-2 border-krakedlight rounded-md p-4 text-krakedlight">
+    <div className="mx-auto max-w-lg bg-krakedgreen2 border-2 border-krakedlight rounded-md p-4 my-16 text-white">
       <div className="flex flex-col gap-2">
-        <h1 className="text-4xl font-bold mb-8">Create a Room</h1>
-        <label className=" text-sm font-medium ">Room Name</label>
+        <h1 className="text-3xl font-bold ">Create a Room</h1>
+        <label className=" text-xl font-medium text-krakedlight ">
+          Room Name
+        </label>
         <input
           type="text"
           value={roomName}
@@ -65,7 +67,7 @@ export default function NewRoomPage() {
           className="bg-krakedlight rounded-md p-2 text-black"
         />
         <button
-          className="cursor-pointer w-full  py-3 rounded-md border-2 border-krakedlight bg-krakedblue2/80 hover:bg-krakedblue2/60 disabled:bg-krakedlight disabled:text-black disabled:cursor-not-allowed"
+          className="cursor-pointer w-full  py-2 rounded-md border-2 border-krakedlight bg-krakedgreen/60 hover:bg-krakedgreen/40 disabled:cursor-not-allowed"
           onClick={handleCreate}
           disabled={!roomName || loading}
         >

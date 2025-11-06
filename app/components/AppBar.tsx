@@ -11,6 +11,10 @@ export function AppBar() {
     router.push("/stats");
   };
 
+  const handleRoomCreations = () => {
+    router.push("/rooms/new");
+  };
+
   return (
     <div>
       <div className="flex justify-between">
@@ -19,7 +23,15 @@ export function AppBar() {
           {session.data?.user && (
             <div>
               <button
-                className="m-2 p-2 rounded-md cursor-pointer bg-krakedyellow"
+                className="m-2 p-2 rounded-md cursor-pointer bg-krakedgreen2 text-white font-medium"
+                onClick={() => {
+                  handleRoomCreations();
+                }}
+              >
+                Create Room
+              </button>
+              <button
+                className="m-2 p-2 rounded-md cursor-pointer font-medium"
                 onClick={() => {
                   handleStatsClick();
                 }}
@@ -27,7 +39,7 @@ export function AppBar() {
                 Stats
               </button>
               <button
-                className="m-2 p-2 rounded-md cursor-pointer bg-orange-400"
+                className="m-2 p-2 rounded-md cursor-pointer bg-gray-400/20 font-medium"
                 onClick={() => signOut()}
               >
                 Log Out
@@ -35,12 +47,22 @@ export function AppBar() {
             </div>
           )}
           {!session.data?.user && (
-            <button
-              className="m-2 p-2 rounded-md cursor-pointer bg-orange-400"
-              onClick={() => signIn()}
-            >
-              Sign In
-            </button>
+            <div>
+              <button
+                className="m-2 p-2 rounded-md cursor-pointer bg-krakedgreen2 text-white font-medium"
+                onClick={() => {
+                  handleRoomCreations();
+                }}
+              >
+                Create Room
+              </button>
+              <button
+                className="m-2 p-2 rounded-md cursor-pointer bg-gray-400/20 font-medium"
+                onClick={() => signIn()}
+              >
+                Sign In
+              </button>
+            </div>
           )}
         </div>
       </div>
