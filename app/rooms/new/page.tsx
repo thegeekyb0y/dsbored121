@@ -34,6 +34,7 @@ export default function NewRoomPage() {
       }
 
       router.push(`/rooms/${data.roomCode}`);
+      /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -61,6 +62,7 @@ export default function NewRoomPage() {
       }
 
       router.push(`/rooms/${data.roomCode}`);
+      /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (err: any) {
       setError(err.message);
     } finally {
