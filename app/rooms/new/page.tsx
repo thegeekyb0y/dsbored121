@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function NewRoomPage() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [roomName, setRoomName] = useState("");
   const [roomCode, setRoomCode] = useState("");
 

@@ -5,8 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { code: string } },
+  props: { params: Promise<{ code: string }> }
 ) {
+  const params = await props.params;
   const { code } = params;
   try {
     const session = await getServerSession(authOptions);
@@ -52,7 +53,7 @@ export async function GET(
     console.error("Error fetching room: ", error);
     return NextResponse.json(
       { error: "Failed to fetch room" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

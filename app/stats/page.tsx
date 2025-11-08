@@ -47,7 +47,7 @@ export default function StatsPage() {
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setStats(data);
-    } catch (err) {
+    } catch {
       setError("Failed to load stats");
     } finally {
       setLoading(false);
