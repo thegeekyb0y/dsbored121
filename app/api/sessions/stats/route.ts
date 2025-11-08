@@ -58,7 +58,7 @@ export async function GET() {
       week: {
         totalMinutes: Math.floor(
           weekStats.reduce((sum, item) => sum + (item._sum.duration || 0), 0) /
-            60
+            60,
         ),
         sessionCount: weekStats.reduce((sum, item) => sum + item._count, 0),
       },
@@ -73,7 +73,7 @@ export async function GET() {
     console.error("Error fetching stats:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

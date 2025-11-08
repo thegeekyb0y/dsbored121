@@ -17,14 +17,14 @@ export async function POST(req: Request) {
     if (!duration || !tag) {
       return NextResponse.json(
         { error: "Missing duration or tag" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (duration < 0) {
       return NextResponse.json(
         { error: "Duration must be positive" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     console.error("❌ Error saving session:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
