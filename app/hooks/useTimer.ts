@@ -14,7 +14,7 @@ interface PomodroState {
 
 export function useTimer(
   durationMinutes: number = 25,
-  onComplete?: (seconds: number) => void
+  onComplete?: (seconds: number) => void,
 ): PomodroState {
   const INITIAL_TIME = durationMinutes * 60;
   const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
@@ -32,7 +32,7 @@ export function useTimer(
         const now = Date.now();
         const remaining = Math.max(
           0,
-          Math.ceil((endTimeRef.current - now) / 1000)
+          Math.ceil((endTimeRef.current - now) / 1000),
         );
 
         setTimeLeft(remaining);
@@ -73,7 +73,7 @@ export function useTimer(
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${String(minutes).padStart(2, "0")}:${String(
-      remainingSeconds
+      remainingSeconds,
     ).padStart(2, "0")}`;
   };
 

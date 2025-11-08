@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating room:", error);
     return NextResponse.json(
       { error: "Failed to create room" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
