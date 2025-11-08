@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (!tag) {
       return NextResponse.json(
         { error: "Subject tag is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
           userImage: user.image,
           tag: tag,
           startedAt: activeSession.startedAt.toISOString(),
-        }
+        },
       );
     }
     console.log(
-      `Started session for ${user.name} and broadcast to ${memberships.length} rooms.`
+      `Started session for ${user.name} and broadcast to ${memberships.length} rooms.`,
     );
 
     return NextResponse.json({
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     console.error("Error starting session:", error);
     return NextResponse.json(
       { error: "Failed to start session" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -34,12 +34,12 @@ export async function POST(request: NextRequest) {
     if (!activeSession) {
       return NextResponse.json(
         { error: "No active session found to stop" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     const duration = Math.floor(
-      (Date.now() - activeSession.startedAt.getTime()) / 1000
+      (Date.now() - activeSession.startedAt.getTime()) / 1000,
     );
 
     const result = await prisma.$transaction(async (tx) => {
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     console.error("Error stopping session:", error);
     return NextResponse.json(
       { error: "Failed to stop session" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
