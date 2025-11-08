@@ -36,16 +36,17 @@ model Session {
 }
 
 model User {
-  id              String         @id @default(cuid())
+  id              String          @id @default(cuid())
   name            String?
-  email           String?        @unique
+  email           String?         @unique
   emailVerified   DateTime?
   image           String?
   accounts        Account[]
   sessions        Session[]
   studySessions   StudySession[]
   roomMemberships RoomMember[]
-  createdAt       DateTime       @default(now())
+  activeSessions  ActiveSession[]
+  createdAt       DateTime        @default(now())
 }
 
 model VerificationToken {
@@ -58,16 +59,17 @@ model VerificationToken {
 
 // Your app models
 model Room {
-  id            String         @id @default(cuid())
-  code          String         @unique
-  name          String
-  hostId        String
-  timerState    String         @default("stopped")
-  timerStartAt  DateTime?
-  timerEndAt    DateTime?
-  createdAt     DateTime       @default(now())
-  members       RoomMember[]
-  studySessions StudySession[]
+  id             String          @id @default(cuid())
+  code           String          @unique
+  name           String
+  hostId         String
+  timerState     String          @default("stopped")
+  timerStartAt   DateTime?
+  timerEndAt     DateTime?
+  createdAt      DateTime        @default(now())
+  members        RoomMember[]
+  studySessions  StudySession[]
+  activeSessions ActiveSession[]
 }
 
 model RoomMember {
@@ -92,4 +94,16 @@ model StudySession {
 
   user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   room Room? @relation(fields: [roomId], references: [id], onDelete: SetNull)
+}
+
+model ActiveSession {
+  id        String   @id @default(cuid())
+  userId    String
+  roomId    String?
+  startedAt DateTime @default(now())
+  tag       String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room      Room?    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roomId])
 }

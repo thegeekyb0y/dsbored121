@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import useStopwatch from "@/app/hooks/useStopwatch";
 import { useTimer } from "@/app/hooks/useTimer";
 

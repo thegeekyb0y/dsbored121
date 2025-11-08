@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import PusherClient, { Channel } from "pusher-js";
+import { useEffect, useRef } from "react";
+import PusherClient from "pusher-js";
 
 export function usePusher(channelName: string) {
-  const [pusher, setPusher] = useState<PusherClient | null>(null);
-  const [channel, setChannel] = useState<Channel | null>(null);
+  const pusherRef = useRef<PusherClient | null>(null);
+  const channelRef = useRef<any>(null);
 
   useEffect(() => {
     const pusherClient = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
@@ -13,13 +13,15 @@ export function usePusher(channelName: string) {
     });
 
     const pusherChannel = pusherClient.subscribe(channelName);
-    setPusher(pusherClient);
-    setChannel(pusherChannel);
+
+    pusherRef.current = pusherClient;
+    channelRef.current = pusherChannel;
 
     return () => {
       pusherChannel.unsubscribe();
       pusherClient.disconnect();
     };
   }, [channelName]);
-  return { pusher, channel };
+
+  return { pusher: pusherRef.current, channel: channelRef.current };
 }

@@ -2,6 +2,10 @@
 
 import { usePusher } from "@/app/hooks/usePusher";
 import { useEffect, useState } from "react";
+interface TestEvent {
+  message: string;
+  timestamp: string;
+}
 
 export default function TestPusherPage() {
   const { channel } = usePusher("test-channel");
@@ -10,7 +14,7 @@ export default function TestPusherPage() {
   useEffect(() => {
     if (!channel) return;
 
-    channel.bind("test-event", (data: any) => {
+    channel.bind("test-event", (data: TestEvent) => {
       console.log("Received:", data);
       setMessages((prev) => [...prev, data.message]);
     });

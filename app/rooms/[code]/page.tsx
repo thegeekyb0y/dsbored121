@@ -49,8 +49,8 @@ export default function RoomPage() {
       }
 
       setRoomData(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to load room");
     } finally {
       setLoading(false);
     }
