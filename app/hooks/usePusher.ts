@@ -23,5 +23,5 @@ export function usePusher(channelName: string) {
     };
   }, [channelName]);
 
-  return { pusher: pusherRef.current, channel: channelRef.current };
+  return { pusherRef, channelRef };
 }
