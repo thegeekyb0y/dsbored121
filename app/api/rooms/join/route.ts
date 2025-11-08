@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       {
         error: "Invalid roomCode",
       },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
   if (existingMember) {
     return NextResponse.json(
       { error: "User already in the room" },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
@@ -72,6 +72,6 @@ export async function POST(request: NextRequest) {
     },
     {
       status: 200,
-    }
+    },
   );
 }

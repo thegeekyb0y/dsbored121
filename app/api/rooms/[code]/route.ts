@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { code: string } }
+  { params }: { params: { code: string } },
 ) {
   const { code } = params;
   try {
@@ -52,7 +52,7 @@ export async function GET(
     console.error("Error fetching room: ", error);
     return NextResponse.json(
       { error: "Failed to fetch room" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
