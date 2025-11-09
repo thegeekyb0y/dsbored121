@@ -57,19 +57,18 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Your app models
+// app models
 model Room {
-  id             String          @id @default(cuid())
-  code           String          @unique
-  name           String
-  hostId         String
-  timerState     String          @default("stopped")
-  timerStartAt   DateTime?
-  timerEndAt     DateTime?
-  createdAt      DateTime        @default(now())
-  members        RoomMember[]
-  studySessions  StudySession[]
-  activeSessions ActiveSession[]
+  id            String         @id @default(cuid())
+  code          String         @unique
+  name          String
+  hostId        String
+  timerState    String         @default("stopped")
+  timerStartAt  DateTime?
+  timerEndAt    DateTime?
+  createdAt     DateTime       @default(now())
+  members       RoomMember[]
+  studySessions StudySession[]
 }
 
 model RoomMember {
@@ -98,12 +97,8 @@ model StudySession {
 
 model ActiveSession {
   id        String   @id @default(cuid())
-  userId    String
-  roomId    String?
+  userId    String   @unique
   startedAt DateTime @default(now())
   tag       String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  room      Room?    @relation(fields: [roomId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, roomId])
 }

@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user.email) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorised" }, { status: 400 });
     }
 
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { roomId, tag } = await request.json();
+    const { tag } = await request.json();
     if (!tag) {
       return NextResponse.json(
         { error: "Subject tag is required" },
@@ -30,29 +30,14 @@ export async function POST(request: NextRequest) {
     }
 
     const activeSession = await prisma.activeSession.upsert({
-      where: {
-        userId_roomId: {
-          userId: user.id,
-          roomId: roomId || null,
-        },
-      },
-      create: {
-        userId: user.id,
-        roomId: roomId || null,
-        tag: tag,
-      },
-      update: {
-        startedAt: new Date(),
-        tag: tag,
-      },
+      where: { userId: user.id },
+      create: { userId: user.id, tag },
+      update: { startedAt: new Date(), tag },
     });
+
     const memberships = await prisma.roomMember.findMany({
-      where: {
-        userId: user.id,
-      },
-      include: {
-        room: true,
-      },
+      where: { userId: user.id },
+      include: { room: true },
     });
 
     for (const member of memberships) {
@@ -63,17 +48,14 @@ export async function POST(request: NextRequest) {
           userId: user.id,
           userName: user.name,
           userImage: user.image,
-          tag: tag,
+          tag,
           startedAt: activeSession.startedAt.toISOString(),
         }
       );
     }
-    console.log(
-      `Started session for ${user.name} and broadcast to ${memberships.length} rooms.`
-    );
 
     return NextResponse.json({
-      succcess: true,
+      success: true,
       activeSession: {
         id: activeSession.id,
         startedAt: activeSession.startedAt.toISOString(),

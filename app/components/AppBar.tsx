@@ -17,7 +17,7 @@ export function AppBar() {
 
   return (
     <div>
-      <div className="flex justify-between bg-neutral-900 border-b border-b-krakedlight/20 items-center mx-20 px-2 py-2 rounded-b-xl">
+      <div className="flex z-50 justify-between bg-neutral-900 border-b border-b-krakedlight/20 items-center mx-4 px-2 py-2 rounded-b-xl backdrop-blur-3xl md:mx-20">
         <div className="p-2 m-2 font-bold cursor-pointer font-mono">Kraked</div>
         <div>
           {session.data?.user && (

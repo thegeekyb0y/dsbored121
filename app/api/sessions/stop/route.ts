@@ -21,14 +21,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { roomId } = await request.json();
-
     const activeSession = await prisma.activeSession.findUnique({
       where: {
-        userId_roomId: {
-          userId: user.id,
-          roomId: roomId || null,
-        },
+        userId: user.id,
       },
     });
     if (!activeSession) {
@@ -49,18 +44,31 @@ export async function POST(request: NextRequest) {
       const studySession = await tx.studySession.create({
         data: {
           userId: user.id,
-          roomId: roomId || null,
           duration: duration,
           tag: activeSession.tag,
         },
       });
       return studySession;
     });
-    if (roomId) {
-      await pusherServer.trigger(`Room-${roomId}`, "session-stopped", {
+
+    const memberships = await prisma.roomMember.findMany({
+      where: {
         userId: user.id,
-        duration: duration,
-      });
+      },
+      include: { room: true },
+    });
+
+    for (const member of memberships) {
+      await pusherServer.trigger(
+        `Room-${member.room.code}`,
+        "session-stopped",
+        {
+          userId: user.id,
+          userName: user.name,
+          duration: duration,
+          tag: activeSession.tag,
+        }
+      );
     }
 
     return NextResponse.json({
