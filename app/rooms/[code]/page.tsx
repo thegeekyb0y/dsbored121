@@ -64,13 +64,13 @@ export default function RoomPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="bg-krakedbg rounded-lg shadow p-6 mb-6">
+      <div className="bg-krakedbg shadow p-6 mb-6">
         <div className="flex justify-between">
           <h1 className="text-3xl font-bold mb-2">{roomData.room.name}</h1>
           <p className="text-krakedblue2 mb-4">Room Code: {roomData.room.id}</p>
         </div>
         {isHost && (
-          <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded text-sm">
+          <span className="inline-block bg-blue-600 text-white px-3 py-1 text-sm">
             Host
           </span>
         )}
@@ -81,14 +81,14 @@ export default function RoomPage() {
           </p>
           <button
             onClick={() => navigator.clipboard.writeText(roomData.room.code)}
-            className="mt-2 bg-krakedblue px-4 py-2 rounded hover:bg-krakedblue/60"
+            className="mt-2 bg-krakedblue px-4 py-2  hover:bg-krakedblue/60"
           >
             Copy Room Code
           </button>
         </div>
       </div>
 
-      <div className="bg-krakedbg rounded-lg shadow p-6">
+      <div className="bg-krakedbg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">
           Members ({roomData.members.length})
         </h2>
@@ -97,16 +97,16 @@ export default function RoomPage() {
           {roomData.members.map((member) => (
             <div
               key={member.id}
-              className="flex items-center gap-3 p-3 bg-krakedblue/60 rounded"
+              className="flex items-center gap-3 p-3 bg-krakedblue/60 "
             >
               {member.user.image ? (
                 <img
                   src={member.user.image}
                   alt={member.user.name || "User"}
-                  className="w-10 h-10 rounded-full"
+                  className="w-10 h-10 "
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-gray-400" />
+                <div className="w-10 h-10 bg-gray-400" />
               )}
 
               <div>
@@ -117,7 +117,7 @@ export default function RoomPage() {
               </div>
 
               {member.user.id === roomData.room.hostId && (
-                <span className="ml-auto text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                <span className="ml-auto text-xs bg-blue-100 text-blue-800 px-2 py-1 ">
                   Host
                 </span>
               )}

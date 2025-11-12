@@ -41,9 +41,9 @@ export default function StatsChart({ data }: StatsChartProps) {
             </div>
 
             {/* Bar */}
-            <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
+            <div className="w-full bg-gray-200 h-3  overflow-hidden">
               <div
-                className="bg-krakedblue2 h-3 rounded-full transition-all duration-300"
+                className="bg-krakedblue2 h-3  transition-all duration-300"
                 style={{ width: `${widthPercent}%` }}
               />
             </div>

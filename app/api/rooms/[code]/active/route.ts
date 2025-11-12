@@ -1,6 +1,5 @@
 import { authOptions } from "@/app/lib/auth";
 import prisma from "@/app/lib/prisma";
-import { error } from "console";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,6 +9,10 @@ export async function GET(
 ) {
   const params = await props.params;
   const { code } = params;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   try {
     const session = await getServerSession(authOptions);
 
@@ -60,8 +63,34 @@ export async function GET(
       },
     });
 
+    const activeUserIds = activeSessions.map((s) => s.userId);
+
+    if (activeUserIds.length === 0) {
+      return NextResponse.json({ activeSessions: [] });
+    }
+
+    const completedTodayByUser = await prisma.studySession.groupBy({
+      by: ["userId"],
+      where: {
+        userId: { in: activeUserIds },
+        createdAt: { gte: today },
+      },
+      _sum: {
+        duration: true,
+      },
+    });
+
+    const completedMap = new Map(
+      completedTodayByUser.map((item) => [item.userId, item._sum.duration || 0])
+    );
+
+    const activeSessionsWithCompleted = activeSessions.map((activeSession) => ({
+      ...activeSession,
+      completedToday: completedMap.get(activeSession.userId) || 0,
+    }));
+
     return NextResponse.json({
-      activeSessions,
+      activeSessions: activeSessionsWithCompleted,
     });
   } catch (error) {
     return NextResponse.json(

@@ -68,7 +68,7 @@ export default function StatsPage() {
         <p className="text-xl">You need to login to access your stats.</p>
         <button
           onClick={() => signIn()}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg"
+          className="bg-blue-600 text-white px-6 py-3"
         >
           Login
         </button>
@@ -93,12 +93,12 @@ export default function StatsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="max-w-6xl mx-auto px-4 py-12">
       <h1 className="text-4xl font-bold mb-8">Your Study Stats</h1>
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {/* Today Card */}
-        <div className="bg-krakedblue border-3 border-krakedlight rounded-lg shadow p-6">
+        <div className="bg-krakedblue border-3 border-krakedlight shadow p-6">
           <h3 className="text-lg font-semibold mb-2 text-krakedlight">Today</h3>
           <div className="text-4xl font-bold text-white mb-2">
             {stats.today.totalMinutes} min
@@ -109,7 +109,7 @@ export default function StatsPage() {
         </div>
 
         {/* This Week Card */}
-        <div className="bg-krakedblue border-3 border-krakedlight rounded-lg shadow p-6">
+        <div className="bg-krakedblue border-3 border-krakedlight shadow p-6">
           <h3 className="text-lg font-semibold mb-2 text-krakedlight">
             This Week
           </h3>
@@ -124,7 +124,7 @@ export default function StatsPage() {
       {/* Chart + Recent Sessions side-by-side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 items-stretch">
         {/* Left: This Week by Subject (chart) */}
-        <div className="bg-krakedblue border-3 border-krakedlight rounded-lg shadow p-6 w-full flex flex-col">
+        <div className="bg-krakedblue border-3 border-krakedlight shadow p-6 w-full flex flex-col">
           {/* make chart fill its area */}
           <div className="w-full flex-1">
             <StatsChart data={stats.bySubject} />
@@ -132,7 +132,7 @@ export default function StatsPage() {
         </div>
 
         {/* Right: Recent Sessions */}
-        <div className="bg-krakedblue border-3 border-krakedlight rounded-lg shadow p-6 w-full flex flex-col">
+        <div className="bg-krakedblue border-3 border-krakedlight shadow p-6 w-full flex flex-col">
           <h3 className="text-xl font-semibold mb-4">Recent Sessions</h3>
 
           {stats.recentSessions.length === 0 ? (

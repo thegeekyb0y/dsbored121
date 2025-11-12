@@ -24,7 +24,7 @@ export default function SubjectSelect({ value, onChange }: SubjectSelectProps) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full px-4 py-3 bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       >
         <option value="">Select subject...</option>
         {SUBJECTS.map((subject) => (

@@ -22,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       {/* Apply the Lexend font, dark background, and white text for a dark theme */}
-      <body className={`${Lexend.className} antialiased bg-black text-white`}>
+      <body
+        className={`${Lexend.className} antialiased bg-black text-white max-w-7xl mx-auto px-4`}
+      >
         <Providers>
           {/* Use the AppLayout component to wrap the entire application content */}
           <AppLayout>{children}</AppLayout>

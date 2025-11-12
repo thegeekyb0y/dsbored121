@@ -34,7 +34,7 @@ export default function TestPusherPage() {
 
       <button
         onClick={sendTest}
-        className="bg-blue-600 text-white px-4 py-2 rounded mb-4"
+        className="bg-blue-600 text-white px-4 py-2  mb-4"
       >
         Send Test Message
       </button>
@@ -45,7 +45,7 @@ export default function TestPusherPage() {
           <p className="text-gray-500">No messages yet. Click the button!</p>
         ) : (
           messages.map((msg, i) => (
-            <div key={i} className="p-2 bg-gray-100 rounded">
+            <div key={i} className="p-2 bg-gray-100 ">
               {msg}
             </div>
           ))

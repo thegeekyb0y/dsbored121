@@ -1,18 +1,24 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import useStopwatch from "@/app/hooks/useStopwatch";
 import { useTimer } from "@/app/hooks/useTimer";
 
 interface UnifiedTimerProps {
   mode: "focus" | "pomodoro";
   onComplete: (durationSeconds: number) => void;
+  subject: string;
 }
 
-export default function UnifiedTimer({ mode, onComplete }: UnifiedTimerProps) {
+export default function UnifiedTimer({
+  mode,
+  onComplete,
+  subject,
+}: UnifiedTimerProps) {
   const stopwatch = useStopwatch();
   const pomodoro = useTimer(25);
   const completionCalledRef = useRef(false);
+  const [sessionActive, setSessionActive] = useState(false);
 
   // Auto-complete for Pomodoro when reaches 00:00
   useEffect(() => {
@@ -33,34 +39,65 @@ export default function UnifiedTimer({ mode, onComplete }: UnifiedTimerProps) {
   const { formattedTime, isRunning, startTimer, pauseTimer, resetTimer } =
     mode === "focus" ? stopwatch : pomodoro;
 
-  const handleStop = () => {
+  const handleStop = async () => {
+    pauseTimer();
+
     const durationToSave =
       mode === "focus"
         ? stopwatch.elapsedSeconds
         : pomodoro.initialDuration - pomodoro.timeLeft;
+
+    try {
+      await fetch("/api/sessions/stop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error("Failed to stop session:", error);
+    }
+
     if (mode === "pomodoro") {
       completionCalledRef.current = true;
     }
+
+    setSessionActive(false);
     onComplete(durationToSave);
     resetTimer();
   };
 
+  const handleStart = async () => {
+    startTimer();
+    setSessionActive(true);
+
+    try {
+      await fetch("/api/sessions/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tag: subject }),
+      });
+    } catch (error) {
+      console.error("Failed to start session:", error);
+    }
+  };
+
   return (
-    <div className="bg-gray-800 rounded-xl p-12 text-center">
+    <div className="bg-gray-800 p-12 text-center">
       <h1 className="text-8xl font-bold text-white mb-8">{formattedTime}</h1>
+
+      <p className="text-gray-300 mb-4">Subject: {subject || "—"}</p>
 
       <div className="flex gap-4 justify-center">
         {!isRunning ? (
           <button
-            onClick={startTimer}
-            className="bg-[#40c057] hover:bg-[#40c057]/80 border-2 border-krakedlight text-white px-8 py-4 rounded-lg font-semibold text-lg"
+            onClick={handleStart}
+            className="bg-[#40c057] hover:bg-[#40c057]/80 border-2 border-krakedlight text-white px-8 py-4 font-semibold text-lg"
           >
             Start
           </button>
         ) : (
           <button
             onClick={pauseTimer}
-            className="bg-yellow-600 hover:bg-yellow-700 border-2 border-krakedlight text-white px-8 py-4 rounded-lg font-semibold text-lg"
+            className="bg-yellow-600 hover:bg-yellow-700 border-2 border-krakedlight text-white px-8 py-4 font-semibold text-lg"
           >
             Pause
           </button>
@@ -73,14 +110,14 @@ export default function UnifiedTimer({ mode, onComplete }: UnifiedTimerProps) {
             (mode === "pomodoro" &&
               pomodoro.timeLeft === pomodoro.initialDuration)
           }
-          className="bg-blue-600 hover:bg-blue-700 border-2 border-krakedlight text-white px-8 py-4 rounded-lg font-semibold text-lg disabled:bg-gray-600 disabled:cursor-not-allowed"
+          className="bg-blue-600 hover:bg-blue-700 border-2 border-krakedlight text-white px-8 py-4 font-semibold text-lg disabled:bg-gray-600 disabled:cursor-not-allowed"
         >
           Stop & Save
         </button>
 
         <button
           onClick={resetTimer}
-          className="bg-gray-600 hover:bg-gray-700 border-2 border-krakedlight text-white px-8 py-4 rounded-lg font-semibold text-lg"
+          className="bg-gray-600 hover:bg-gray-700 border-2 border-krakedlight text-white px-8 py-4 font-semibold text-lg"
         >
           Reset
         </button>

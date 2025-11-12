@@ -13,7 +13,7 @@ export default function TestStopwatch() {
   } = useStopwatch();
 
   return (
-    <div className="p-8 bg-krakedgreen rounded-xl border-2 border-krakedlight">
+    <div className="p-8 bg-krakedgreen border-2 border-krakedlight">
       <h1 className="text-6xl font-bold m-0 leading-tight">{formattedTime}</h1>
       <p className="m-0 mt-2">Elapsed: {elapsedSeconds} seconds</p>
 
@@ -21,14 +21,14 @@ export default function TestStopwatch() {
         {!isRunning ? (
           <button
             onClick={startTimer}
-            className="bg-green-500 px-4 py-2 rounded-md m-0 inline-flex items-center"
+            className="bg-green-500 px-4 py-2 m-0 inline-flex items-center"
           >
             Start
           </button>
         ) : (
           <button
             onClick={pauseTimer}
-            className="bg-yellow-500 px-4 py-2 rounded-md m-0 inline-flex items-center"
+            className="bg-yellow-500 px-4 py-2 m-0 inline-flex items-center"
           >
             Pause
           </button>
@@ -36,7 +36,7 @@ export default function TestStopwatch() {
 
         <button
           onClick={resetTimer}
-          className="bg-red-500 px-4 py-2 rounded-md m-0 inline-flex items-center"
+          className="bg-red-500 px-4 py-2 m-0 inline-flex items-center"
         >
           Reset
         </button>

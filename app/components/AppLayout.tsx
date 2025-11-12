@@ -7,7 +7,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen">
       <AppBar />
-      <main className="p-4 pt-10 max-w-7xl mx-auto">{children}</main>
+      <main className="p-2 pt-20 max-w-7xl mx-auto">{children}</main>
     </div>
   );
 };
