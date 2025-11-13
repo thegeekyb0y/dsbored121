@@ -38,7 +38,7 @@ export default function TimerPage() {
   };
 
   return (
-    <div className="px-4 py-12 bg-krakedblue/30 cursor-grab border-3 border-krakedlight/45 ">
+    <div className="px-4 py-8 w-full  bg-krakedblue/30 cursor-grab border-3 border-krakedlight/45 ">
       <h1 className="text-4xl font-bold text-center mb-8">Study Timer</h1>
 
       <div className="flex flex-col items-center">

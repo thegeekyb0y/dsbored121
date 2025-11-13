@@ -29,6 +29,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const completedToday = await prisma.studySession.aggregate({
+      where: {
+        userId: user.id,
+        createdAt: { gte: today },
+      },
+      _sum: { duration: true },
+    });
+
+    const completedSeconds = completedToday._sum.duration || 0;
+
     const activeSession = await prisma.activeSession.upsert({
       where: { userId: user.id },
       create: { userId: user.id, tag },
@@ -50,6 +63,7 @@ export async function POST(request: NextRequest) {
           userImage: user.image,
           tag,
           startedAt: activeSession.startedAt.toISOString(),
+          completedToday: completedSeconds,
         }
       );
     }

@@ -96,9 +96,11 @@ model StudySession {
 }
 
 model ActiveSession {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  startedAt DateTime @default(now())
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  startedAt DateTime  @default(now())
   tag       String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isPaused  Boolean   @default(false)
+  pausedAt  DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

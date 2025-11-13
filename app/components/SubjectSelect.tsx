@@ -17,7 +17,7 @@ interface SubjectSelectProps {
 
 export default function SubjectSelect({ value, onChange }: SubjectSelectProps) {
   return (
-    <div className="w-full max-w-md mx-auto mb-6">
+    <div className="w-full mx-auto mb-6">
       <label className="block text-sm font-medium text-gray-300 mb-2">
         What are you studying?
       </label>
