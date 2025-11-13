@@ -1,5 +1,7 @@
 "use client";
 
+import LiveTimer from "@/app/components/LiveTimer";
+import { usePusher } from "@/app/hooks/usePusher";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -30,14 +32,55 @@ export default function RoomPage() {
   const params = useParams();
   const { data: session } = useSession();
   const code = params.code as string;
+  const { channel } = usePusher(`room-${code}`);
 
   const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeSessions, setActiveSessions] = useState<
+    Map<
+      string,
+      {
+        startedAt: string;
+        tag: string;
+        completedToday: number;
+      }
+    >
+  >(new Map());
 
   useEffect(() => {
     fetchRoomData();
+    fetchActiveSessions();
   }, [code]);
+
+  useEffect(() => {
+    if (!channel) return;
+
+    channel.bind("session-started", (data: any) => {
+      setActiveSessions((prev) => {
+        const updated = new Map(prev);
+        updated.set(data.userId, {
+          startedAt: data.startedAt,
+          tag: data.tag,
+          completedToday: data.completedToday,
+        });
+        return updated;
+      });
+    });
+
+    channel.bind("session-stopped", (data: { userId: string }) => {
+      setActiveSessions((prev) => {
+        const updated = new Map(prev);
+        updated.delete(data.userId);
+        return updated;
+      });
+    });
+
+    return () => {
+      channel.unbind("session-started");
+      channel.unbind("session-stopped");
+    };
+  }, [channel]);
 
   const fetchRoomData = async () => {
     try {
@@ -53,6 +96,27 @@ export default function RoomPage() {
       setError(error instanceof Error ? error.message : "Failed to load room");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchActiveSessions = async () => {
+    try {
+      const response = await fetch(`/api/rooms/${code}/active`);
+      const data = await response.json();
+
+      if (response.ok && data.activeSessions) {
+        const sessionsMap = new Map();
+        data.activeSessions.forEach((s: any) => {
+          sessionsMap.set(s.userId, {
+            startedAt: s.startedAt,
+            tag: s.tag,
+            completedToday: s.completedToday,
+          });
+        });
+        setActiveSessions(sessionsMap);
+      }
+    } catch (error) {
+      console.error("Failed to fetch active sessions:", error);
     }
   };
 
@@ -94,35 +158,60 @@ export default function RoomPage() {
         </h2>
 
         <div className="space-y-3">
-          {roomData.members.map((member) => (
-            <div
-              key={member.id}
-              className="flex items-center gap-3 p-3 bg-krakedblue/60 "
-            >
-              {member.user.image ? (
-                <img
-                  src={member.user.image}
-                  alt={member.user.name || "User"}
-                  className="w-10 h-10 "
+          {roomData.members.map((member) => {
+            const activeSession = activeSessions.get(member.user.id);
+            const isActive = !!activeSession;
+
+            return (
+              <div
+                key={member.id}
+                className="flex items-center gap-3 p-3 bg-krakedblue/60"
+              >
+                {/* Status dot */}
+                <div
+                  className={`w-3 h-3 rounded-full ${
+                    isActive ? "bg-green-500 animate-pulse" : "bg-gray-500"
+                  }`}
                 />
-              ) : (
-                <div className="w-10 h-10 bg-gray-400" />
-              )}
 
-              <div>
-                <p className="font-medium">{member.user.name || "Unknown"}</p>
-                <p className="text-sm text-gray-500">
-                  Joined {new Date(member.joinedAt).toLocaleDateString()}
-                </p>
+                {member.user.image ? (
+                  <img
+                    src={member.user.image}
+                    alt={member.user.name || "User"}
+                    className="w-10 h-10"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-gray-400" />
+                )}
+
+                <div className="flex-1">
+                  <p className="font-medium">{member.user.name || "Unknown"}</p>
+
+                  {isActive ? (
+                    <div className="flex items-center gap-2">
+                      <LiveTimer
+                        startedAt={activeSession.startedAt}
+                        completedToday={activeSession.completedToday}
+                        className="text-green-500 font-semibold"
+                      />
+                      <span className="text-gray-400">·</span>
+                      <span className="text-sm text-gray-500">
+                        {activeSession.tag}
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">Offline</p>
+                  )}
+                </div>
+
+                {member.user.id === roomData.room.hostId && (
+                  <span className="ml-auto text-xs bg-blue-100 text-blue-800 px-2 py-1">
+                    Host
+                  </span>
+                )}
               </div>
-
-              {member.user.id === roomData.room.hostId && (
-                <span className="ml-auto text-xs bg-blue-100 text-blue-800 px-2 py-1 ">
-                  Host
-                </span>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

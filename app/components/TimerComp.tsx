@@ -26,7 +26,7 @@ export default function TimerComp({ onComplete }: TimerCompProps) {
 
   return (
     <div>
-      <div className="bg-krakedgreen border-2 border-krakedlight pt-4 mt-12 mx-12 px-4 flex flex-col gap-2 items-start justify-center ">
+      <div className="bg-krakedgreen border-2 border-krakedlight  flex flex-col gap-2 items-start justify-center ">
         Pomodro
         <div className="text-8xl text-krakedlight ">{formattedTime}</div>
         <div className="flex gap-2">

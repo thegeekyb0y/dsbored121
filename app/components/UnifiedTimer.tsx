@@ -81,7 +81,7 @@ export default function UnifiedTimer({
   };
 
   return (
-    <div className="bg-gray-800 p-12 text-center">
+    <div className="bg-gray-800 w-full max-w-lg p-12 text-center">
       <h1 className="text-8xl font-bold text-white mb-8">{formattedTime}</h1>
 
       <p className="text-gray-300 mb-4">Subject: {subject || "—"}</p>

@@ -8,9 +8,6 @@ export default function Home() {
       <section className="relative z-10 p-10">
         <div className="flex gap-8 items-start">
           <Timer />
-          <div className="w-2/4">
-            <StatsPage />
-          </div>
         </div>
       </section>
     </main>

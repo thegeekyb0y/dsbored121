@@ -3,6 +3,7 @@
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import StatsChart from "@/app/components/StatsChart";
+import Image from "next/image";
 
 interface StatsData {
   today: {
@@ -94,33 +95,54 @@ export default function StatsPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold mb-8">Your Study Stats</h1>
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        {/* Today Card */}
-        <div className="bg-krakedblue border-3 border-krakedlight shadow p-6">
-          <h3 className="text-lg font-semibold mb-2 text-krakedlight">Today</h3>
-          <div className="text-4xl font-bold text-white mb-2">
-            {stats.today.totalMinutes} min
+      {/* Main Container with Image on Right */}
+      <div className="flex gap-6 mb-12">
+        {/* Left side: Heading + Stats Cards */}
+        <div className="flex-1">
+          <h1 className="text-4xl font-bold mb-8">Your Study Stats</h1>
+
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Today Card */}
+            <div className="bg-krakedblue border-3 border-krakedlight shadow p-6">
+              <h3 className="text-lg font-semibold mb-2 text-krakedlight">
+                Today
+              </h3>
+              <div className="text-4xl font-bold text-white mb-2">
+                {stats.today.totalMinutes} min
+              </div>
+              <p className="text-krakedlight/80">
+                {stats.today.sessionCount} sessions
+              </p>
+            </div>
+
+            {/* This Week Card */}
+            <div className="bg-krakedblue border-3 border-krakedlight shadow p-6">
+              <h3 className="text-lg font-semibold mb-2 text-krakedlight">
+                This Week
+              </h3>
+              <div className="text-4xl font-bold text-white mb-2">
+                {stats.week.totalMinutes} min
+              </div>
+              <p className="text-krakedlight/80">
+                {stats.week.sessionCount} sessions
+              </p>
+            </div>
           </div>
-          <p className="text-krakedlight/80">
-            {stats.today.sessionCount} sessions
-          </p>
         </div>
 
-        {/* This Week Card */}
-        <div className="bg-krakedblue border-3 border-krakedlight shadow p-6">
-          <h3 className="text-lg font-semibold mb-2 text-krakedlight">
-            This Week
-          </h3>
-          <div className="text-4xl font-bold text-white mb-2">
-            {stats.week.totalMinutes} min
-          </div>
-          <p className="text-krakedlight/80">
-            {stats.week.sessionCount} sessions
-          </p>
+        {/* Right side: Image spanning full height */}
+        <div className="w-64 shrink-0">
+          <Image
+            src="/statsfocus.jpg"
+            alt="A detailed pencil sketch of a character by a fire."
+            layout="responsive"
+            width={400}
+            height={400}
+          />
         </div>
       </div>
+
       {/* Chart + Recent Sessions side-by-side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 items-stretch">
         {/* Left: This Week by Subject (chart) */}
