@@ -5,7 +5,7 @@ import { usePusher } from "@/app/hooks/usePusher";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react"; // 1. Added useCallback
 
 interface Member {
   id: string;
@@ -24,6 +24,19 @@ interface ActiveSessionState {
   completedToday: number;
   isPaused: boolean;
   pausedAt: string | null;
+}
+
+// 2. Interface to fix the Pusher 'session-started' any error (Line 83)
+interface SessionStartedData {
+  userId: string;
+  startedAt: string;
+  tag: string;
+  completedToday: number;
+}
+
+// 3. Interface to fix the fetchActiveSessions 'any' error (Line 185)
+interface ActiveSession extends ActiveSessionState {
+  userId: string;
 }
 
 interface RoomData {
@@ -64,6 +77,60 @@ export default function RoomPage() {
     {}
   );
 
+  // 4. Wrapped fetch functions in useCallback to fix react-hooks/exhaustive-deps warning
+  const fetchRoomData = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/rooms/${code}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+
+      setRoomData(data);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to load room");
+    } finally {
+      setLoading(false);
+    }
+  }, [code]);
+
+  const fetchActiveSessions = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/rooms/${code}/active`);
+      const data = await response.json();
+
+      if (response.ok && data.activeSessions) {
+        const sessionsMap = new Map<string, ActiveSessionState>(); // Added Map types
+
+        // 5. Replaced 'any' with ActiveSession type (Fixes Error on original Line 185)
+        data.activeSessions.forEach((s: ActiveSession) => {
+          sessionsMap.set(s.userId, {
+            startedAt: s.startedAt,
+            tag: s.tag,
+            completedToday: s.completedToday,
+            isPaused: s.isPaused,
+            pausedAt: s.pausedAt,
+          });
+          // Update local study durations map from initial fetch data
+          setStudyDurations((prev) => ({
+            ...prev,
+            [s.userId]: data.studyDurationToday[s.userId] || 0, // Use the separate studyDurationToday map
+          }));
+        });
+        setActiveSessions(sessionsMap);
+
+        // Also ensure study durations for offline members are initialized
+        setStudyDurations((prev) => ({
+          ...prev,
+          ...data.studyDurationToday,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to fetch active sessions:", error);
+    }
+  }, [code]); // Dependencies include 'code' and state setters
+
   useEffect(() => {
     // Initialize/Update member study durations from the initial fetch
     if (roomData?.studyDurationToday) {
@@ -72,15 +139,17 @@ export default function RoomPage() {
   }, [roomData]);
 
   useEffect(() => {
+    // 6. Included fetch functions in dependency array (Fixes React Hook warning on original Line 77)
     fetchRoomData();
     fetchActiveSessions();
-  }, [code]);
+  }, [code, fetchRoomData, fetchActiveSessions]);
 
   useEffect(() => {
     if (!channel) return;
 
     // --- Start Listener ---
-    channel.bind("session-started", (data: any) => {
+    // 7. Replaced 'any' with SessionStartedData type (Fixes Error on original Line 83)
+    channel.bind("session-started", (data: SessionStartedData) => {
       setActiveSessions((prev) => {
         const updated = new Map(prev);
         updated.set(data.userId, {
@@ -158,56 +227,7 @@ export default function RoomPage() {
     };
   }, [channel]);
 
-  const fetchRoomData = async () => {
-    try {
-      const response = await fetch(`/api/rooms/${code}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error);
-      }
-
-      setRoomData(data);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to load room");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchActiveSessions = async () => {
-    try {
-      const response = await fetch(`/api/rooms/${code}/active`);
-      const data = await response.json();
-
-      if (response.ok && data.activeSessions) {
-        const sessionsMap = new Map();
-        data.activeSessions.forEach((s: any) => {
-          sessionsMap.set(s.userId, {
-            startedAt: s.startedAt,
-            tag: s.tag,
-            completedToday: s.completedToday,
-            isPaused: s.isPaused,
-            pausedAt: s.pausedAt,
-          });
-          // Update local study durations map from initial fetch data
-          setStudyDurations((prev) => ({
-            ...prev,
-            [s.userId]: data.studyDurationToday[s.userId] || 0, // Use the separate studyDurationToday map
-          }));
-        });
-        setActiveSessions(sessionsMap);
-
-        // Also ensure study durations for offline members are initialized
-        setStudyDurations((prev) => ({
-          ...prev,
-          ...data.studyDurationToday,
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to fetch active sessions:", error);
-    }
-  };
+  // Original fetchRoomData and fetchActiveSessions functions are now the useCallback definitions above.
 
   if (loading) return <div>Loading room...</div>;
   if (error) return <div>Error: {error}</div>;
