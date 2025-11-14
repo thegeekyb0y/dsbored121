@@ -10,24 +10,24 @@ export default function RoomsListPage() {
 
   useEffect(() => {
     if (session) {
+      const fetchMyRooms = async () => {
+        const response = await fetch("/api/rooms/my-rooms");
+        const data = await response.json();
+        setRooms(data.rooms);
+      };
+
       fetchMyRooms();
     }
   }, [session]);
-
-  const fetchMyRooms = async () => {
-    const response = await fetch("/api/rooms/my-rooms");
-    const data = await response.json();
-    setRooms(data.rooms);
-  };
 
   return (
     <div className="mx-auto p-8">
       <h1 className="text-3xl font-bold mb-6">My Study Rooms</h1>
 
       <div className="grid gap-4">
-        {rooms.map((room: any) => (
+        {rooms.map((room: { id: string; code: string; name: string }) => (
           <Link
-            key={room.id}
+            key={room.code}
             href={`/rooms/${room.code}`}
             className="p-4 bg-gray-800 rounded hover:bg-gray-700"
           >

@@ -3,6 +3,7 @@
 import LiveTimer from "@/app/components/LiveTimer";
 import { usePusher } from "@/app/hooks/usePusher";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -292,10 +293,13 @@ export default function RoomPage() {
                 />
 
                 {member.user.image ? (
-                  <img
+                  <Image
                     src={member.user.image}
                     alt={member.user.name || "User"}
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full object-cover"
+                    unoptimized={true} // Assuming external images might not need optimization
                   />
                 ) : (
                   <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-xs text-white font-bold">

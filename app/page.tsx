@@ -1,5 +1,3 @@
-import StatsChart from "./components/StatsChart";
-import StatsPage from "./stats/page";
 import Timer from "./timer/page";
 
 export default function Home() {

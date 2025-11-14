@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       {
         error: "Invalid roomCode",
       },
-      { status: 404 },
+      { status: 404 }
     );
   }
 
@@ -54,11 +54,11 @@ export async function POST(request: NextRequest) {
   if (existingMember) {
     return NextResponse.json(
       { error: "User already in the room" },
-      { status: 404 },
+      { status: 404 }
     );
   }
 
-  const newMember = await prisma.roomMember.create({
+  await prisma.roomMember.create({
     data: {
       roomId: room.id,
       userId: user.id,
@@ -72,6 +72,6 @@ export async function POST(request: NextRequest) {
     },
     {
       status: 200,
-    },
+    }
   );
 }

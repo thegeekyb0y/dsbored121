@@ -2,9 +2,9 @@ import { authOptions } from "@/app/lib/auth";
 import prisma from "@/app/lib/prisma";
 import { pusherServer } from "@/app/lib/pusher";
 import { getServerSession } from "next-auth";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const session = await getServerSession(authOptions);
 
