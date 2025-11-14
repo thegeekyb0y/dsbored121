@@ -56,7 +56,7 @@ export async function POST() {
     });
 
     for (const member of memberships) {
-      await pusherServer.trigger(`Room-${member.room.code}`, "session-paused", {
+      await pusherServer.trigger(`room-${member.room.code}`, "session-paused", {
         userId: user.id,
         userName: user.name,
         pausedAt: updatedSession.pausedAt,

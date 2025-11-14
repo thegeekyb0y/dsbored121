@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     for (const member of memberships) {
       await pusherServer.trigger(
-        `Room-${member.room.code}`,
+        `room-${member.room.code}`,
         "session-stopped",
         {
           userId: user.id,
