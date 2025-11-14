@@ -20,7 +20,6 @@ export default function UnifiedTimer({
   const completionCalledRef = useRef(false);
   const [sessionActive, setSessionActive] = useState(false);
 
-  // Auto-complete for Pomodoro when reaches 00:00
   useEffect(() => {
     if (mode !== "pomodoro") return;
 
@@ -38,6 +37,32 @@ export default function UnifiedTimer({
 
   const { formattedTime, isRunning, startTimer, pauseTimer, resetTimer } =
     mode === "focus" ? stopwatch : pomodoro;
+
+  const isInitialState =
+    mode === "focus"
+      ? stopwatch.elapsedSeconds === 0
+      : pomodoro.timeLeft === pomodoro.initialDuration;
+
+  const handlePause = async () => {
+    pauseTimer();
+
+    try {
+      await fetch("/api/sessions/pause", { method: "POST" });
+    } catch (error) {
+      console.error("Failed to pause session:", error);
+    }
+  };
+
+  const handleResume = async () => {
+    startTimer();
+
+    try {
+      const response = await fetch("/api/sessions/resume", { method: "POST" });
+      const data = await response.json();
+    } catch (error) {
+      console.error("Failed to resume session:", error);
+    }
+  };
 
   const handleStop = async () => {
     pauseTimer();
@@ -89,14 +114,14 @@ export default function UnifiedTimer({
       <div className="flex gap-4 justify-center">
         {!isRunning ? (
           <button
-            onClick={handleStart}
+            onClick={isInitialState ? handleStart : handleResume}
             className="bg-[#40c057] hover:bg-[#40c057]/80 border-2 border-krakedlight text-white px-8 py-4 font-semibold text-lg"
           >
-            Start
+            {isInitialState ? "Start" : "Resume"}
           </button>
         ) : (
           <button
-            onClick={pauseTimer}
+            onClick={handlePause}
             className="bg-yellow-600 hover:bg-yellow-700 border-2 border-krakedlight text-white px-8 py-4 font-semibold text-lg"
           >
             Pause

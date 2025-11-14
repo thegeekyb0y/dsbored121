@@ -2,7 +2,7 @@ import { authOptions } from "@/app/lib/auth";
 import prisma from "@/app/lib/prisma";
 import { pusherServer } from "@/app/lib/pusher";
 import { getServerSession } from "next-auth";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export async function POST() {
   try {
@@ -33,18 +33,24 @@ export async function POST() {
       );
     }
 
-    if (activeSession.isPaused) {
+    if (!activeSession || !activeSession.isPaused || !activeSession.pausedAt) {
       return NextResponse.json(
-        { message: "Session is already paused" },
+        { message: "Session is already running" },
         { status: 200 }
       );
     }
 
+    const pausedDurationMs = now.getTime() - activeSession.pausedAt.getTime();
+
+    const newStartedAtMs = activeSession.startedAt.getTime() + pausedDurationMs;
+    const newStartedAt = new Date(newStartedAtMs);
+
     const updatedSession = await prisma.activeSession.update({
       where: { userId: user.id },
       data: {
-        isPaused: true,
-        pausedAt: now,
+        isPaused: false,
+        startedAt: newStartedAt,
+        pausedAt: null,
       },
     });
 
@@ -56,20 +62,28 @@ export async function POST() {
     });
 
     for (const member of memberships) {
-      await pusherServer.trigger(`Room-${member.room.code}`, "session-paused", {
-        userId: user.id,
-        userName: user.name,
-        pausedAt: updatedSession.pausedAt,
-      });
+      await pusherServer.trigger(
+        `room-${member.room.code}`,
+        "session-resumed",
+        {
+          userId: user.id,
+          userName: user.name, // Added for consistency with pause/route.ts
+          newStartedAt: updatedSession.startedAt,
+        }
+      );
     }
     return NextResponse.json(
-      { message: "Session paused successfully", pausedAt: now },
+      {
+        message: "Session resumed successfully",
+        newStartedAt: updatedSession.startedAt,
+        pausedDurationMs: pausedDurationMs,
+      },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Pause Session Error:", error);
+    console.error("Resume Session Error:", error);
     return NextResponse.json(
-      { error: "Failed to pause session" },
+      { error: "Failed to resume session" },
       { status: 500 }
     );
   }
