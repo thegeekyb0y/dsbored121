@@ -162,7 +162,6 @@ export default function StatsPage() {
         <SubjectPieChart data={stats.bySubject} />
       </div>
 
-      {/* Activity Heatmap with Insights */}
       <ActivityHeatmap
         data={stats.monthActivity || []}
         insights={stats.insights}
