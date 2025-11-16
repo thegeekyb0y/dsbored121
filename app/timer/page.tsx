@@ -5,6 +5,8 @@ import { useState } from "react";
 import ModeSelector from "../components/ModeSelector";
 import SubjectSelect from "../components/SubjectSelect";
 import UnifiedTimer from "../components/UnifiedTimer";
+import { PauseComp } from "../components/PauseComp";
+import { Clock, PlayIcon, Plus, PlusCircleIcon } from "lucide-react";
 
 export default function TimerPage() {
   const { data: session } = useSession();
@@ -54,7 +56,7 @@ export default function TimerPage() {
 
         {/* Subject Selection Modal/Dropdown */}
         {showSubjectSelect && (
-          <div className="w-full max-w-md mb-6 p-6 bg-gray-800">
+          <div className="w-full max-w-sm mb-6 p-6 bg-gray-800">
             <SubjectSelect value={subject} onChange={setSubject} />
             <div className="flex gap-4 mt-4">
               <button
@@ -78,19 +80,13 @@ export default function TimerPage() {
         {!timerActive ? (
           <button
             onClick={handleStartClick}
-            className="bg-green-700 hover:bg-green-800 border-2 border-krakedlight text-white px-12 py-6  font-bold text-2xl"
+            className="bg-green-700 hover:bg-green-800 border-2 flex items-center gap-4 border-krakedlight text-white px-8 py-6  font-bold text-2xl"
           >
+            <PlayIcon className="w-6 h-6" />
             Start Study Session
           </button>
         ) : (
           <>
-            {/* Show selected subject */}
-            <div className="mb-4 text-center">
-              <span className="inline-block bg-blue-600 text-white px-4 py-2 text-sm font-medium">
-                {subject}
-              </span>
-            </div>
-
             {/* Unified Timer */}
             <UnifiedTimer
               mode={mode}

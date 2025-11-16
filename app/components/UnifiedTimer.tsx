@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import useStopwatch from "@/app/hooks/useStopwatch";
 import { useTimer } from "@/app/hooks/useTimer";
+import { PauseIcon, PlayIcon, RedoIcon, SaveAllIcon } from "lucide-react";
 
 interface UnifiedTimerProps {
   mode: "focus" | "pomodoro";
@@ -106,7 +107,7 @@ export default function UnifiedTimer({
   };
 
   return (
-    <div className="bg-gray-800 w-full max-w-lg p-12 text-center">
+    <div className="bg-krakedblue/40 w-full max-w-lg p-8  text-center">
       <h1 className="text-8xl font-bold text-white mb-8">{formattedTime}</h1>
 
       <p className="text-gray-300 mb-4">Subject: {subject || "—"}</p>
@@ -115,15 +116,17 @@ export default function UnifiedTimer({
         {!isRunning ? (
           <button
             onClick={isInitialState ? handleStart : handleResume}
-            className="bg-[#40c057] hover:bg-[#40c057]/80 border-2 border-krakedlight text-white px-8 py-4 font-semibold text-lg"
+            className="bg-[#40c057] hover:bg-[#40c057]/80 border-2 flex items-center gap-3 border-krakedlight text-white px-4 py-4 font-semibold text-lg"
           >
+            <PlayIcon width={20} height={20} />
             {isInitialState ? "Start" : "Resume"}
           </button>
         ) : (
           <button
             onClick={handlePause}
-            className="bg-yellow-600 hover:bg-yellow-700 border-2 border-krakedlight text-white px-8 py-4 font-semibold text-lg"
+            className="bg-yellow-600 hover:bg-yellow-700 border-2 flex items-center gap-3 border-krakedlight text-white px-4 py-4 font-semibold text-lg"
           >
+            <PauseIcon width={20} height={20} />
             Pause
           </button>
         )}
@@ -135,15 +138,17 @@ export default function UnifiedTimer({
             (mode === "pomodoro" &&
               pomodoro.timeLeft === pomodoro.initialDuration)
           }
-          className="bg-blue-600 hover:bg-blue-700 border-2 border-krakedlight text-white px-8 py-4 font-semibold text-lg disabled:bg-gray-600 disabled:cursor-not-allowed"
+          className="bg-blue-600 hover:bg-blue-700 border-2 flex items-center gap-2 border-krakedlight text-white px-2 py-4 font-semibold text-md disabled:bg-gray-600 disabled:cursor-not-allowed"
         >
+          <SaveAllIcon width={20} height={20} />
           Stop & Save
         </button>
 
         <button
           onClick={resetTimer}
-          className="bg-gray-600 hover:bg-gray-700 border-2 border-krakedlight text-white px-8 py-4 font-semibold text-lg"
+          className="bg-gray-600  hover:bg-gray-700 border-2 border-krakedlight flex items-center gap-2 text-white px-4 py-4 font-semibold text-md"
         >
+          <RedoIcon width={20} height={20} />
           Reset
         </button>
       </div>

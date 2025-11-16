@@ -1,5 +1,7 @@
 "use client";
 
+import { FlameIcon, HourglassIcon } from "lucide-react";
+
 interface ModeSelectorProps {
   mode: "focus" | "pomodoro";
   onModeChange: (mode: "focus" | "pomodoro") => void;
@@ -13,23 +15,24 @@ export default function ModeSelector({
     <div className="flex gap-4 mb-8">
       <button
         onClick={() => onModeChange("focus")}
-        className={`px-4 py-3  font-semibold transition ${
+        className={`px-4 py-3  font-semibold transition flex items-center gap-3 ${
           mode === "focus"
-            ? "bg-[#3B82C6] text-white border-2 border-krakedlight"
+            ? "bg-[#26659f] text-white border-2 border-krakedlight"
             : "bg-[#3B82C6]/20 text-gray-300 hover:bg-[#3B82C6]/30"
         }`}
       >
-        🔥 Focus Mode
+        <FlameIcon width={20} height={20} />
+        Focus Mode
       </button>
       <button
         onClick={() => onModeChange("pomodoro")}
-        className={`px-6 py-3 font-semibold transition ${
+        className={`px-6 py-3 font-semibold transition flex items-center gap-3 ${
           mode === "pomodoro"
-            ? "bg-[#3B82C6] text-white border-2 border-krakedlight"
+            ? "bg-[#26659f] text-white border-2 border-krakedlight"
             : "bg-[#3B82C6]/20 text-gray-300 hover:bg-[#3B82C6]/30"
         }`}
       >
-        ⌛ Pomodoro
+        <HourglassIcon height={20} width={20} /> Pomodoro
       </button>
     </div>
   );

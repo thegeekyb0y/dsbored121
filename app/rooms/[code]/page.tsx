@@ -1,6 +1,7 @@
 "use client";
 
 import LiveTimer from "@/app/components/LiveTimer";
+import { RoomDetailSkeleton } from "@/app/components/RoomsSkeleton";
 import { usePusher } from "@/app/hooks/usePusher";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -229,7 +230,7 @@ export default function RoomPage() {
 
   // Original fetchRoomData and fetchActiveSessions functions are now the useCallback definitions above.
 
-  if (loading) return <div>Loading room...</div>;
+  if (loading) return <RoomDetailSkeleton />;
   if (error) return <div>Error: {error}</div>;
   if (!roomData) return <div>Room not found</div>;
 

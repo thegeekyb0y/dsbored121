@@ -14,7 +14,7 @@ export function AppBar() {
   };
 
   const handleRoomCreations = () => {
-    router.push("/rooms/new");
+    router.push("/rooms/");
   };
 
   return (
@@ -39,7 +39,7 @@ export function AppBar() {
                 className="px-2 py-1  cursor-pointer bg-green-500/40 text-white font-medium hover:bg-green-500/60 transition-colors"
                 onClick={handleRoomCreations}
               >
-                Create Room
+                Rooms
               </button>
               <button
                 className="px-2 py-1  cursor-pointer text-gray-300 hover:text-white font-medium transition-colors"
