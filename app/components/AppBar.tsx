@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn, signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -19,7 +20,15 @@ export function AppBar() {
   return (
     <div className="fixed top-0 left-0 w-full z-50 p-4 ">
       <div className="flex justify-between bg-neutral-900 border border-krakedlight/50 items-center mx-auto px-4 py-2  backdrop-blur-3xl max-w-6xl">
-        <div className="p-2 m-2 font-bold cursor-pointer font-mono text-white">
+        <div className=" flex flex-row gap-2 p-2 m-2 font-bold cursor-pointer font-mono text-white items-center">
+          <Image
+            src={"/krakedlogo.png"}
+            alt={"Logo"}
+            width={40}
+            height={40}
+            className="w-8 h-8 rounded-full object-cover"
+            unoptimized={true} // Assuming external images might not need optimization
+          />
           <Link href={"/"}> Kraked </Link>
         </div>
 

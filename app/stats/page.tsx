@@ -2,8 +2,10 @@
 
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
-import StatsChart from "@/app/components/StatsChart";
 import Image from "next/image";
+import WeeklyChart from "../components/WeeklyChart";
+import SubjectPieChart from "../components/SubjectPie";
+import ActivityHeatmap from "../components/ActivityComponent";
 
 interface StatsData {
   today: {
@@ -19,12 +21,23 @@ interface StatsData {
     minutes: number;
     count: number;
   }>;
-  recentSessions: Array<{
-    id: string;
-    duration: number;
-    tag: string;
-    createdAt: string;
+  dailyData: Array<{
+    date: string;
+    day: string;
+    minutes: number;
   }>;
+  monthActivity: Array<{
+    date: string;
+    minutes: number;
+  }>;
+  insights: {
+    currentStreak: number;
+    longestStreak: number;
+    longestStreakDate: string;
+    mostActiveDay: string;
+    mostActiveTime: string;
+    mostStudiedSubject: string;
+  };
 }
 
 export default function StatsPage() {
@@ -44,7 +57,7 @@ export default function StatsPage() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/sessions/stats");
+      const response = await fetch(`/api/sessions/stats`);
       if (!response.ok) throw new Error("Failed to fetch");
       const data = await response.json();
       setStats(data);
@@ -94,17 +107,16 @@ export default function StatsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
-      {/* Main Container with Image on Right */}
+    <div className="max-w-7xl mx-auto px-12 py-12">
+      {/* Top Section: Heading + Stats Cards + Image */}
       <div className="flex gap-6 mb-12">
         {/* Left side: Heading + Stats Cards */}
         <div className="flex-1">
           <h1 className="text-4xl font-bold mb-8">Your Study Stats</h1>
-
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Today Card */}
-            <div className="bg-krakedblue border-3 border-krakedlight shadow p-6">
+            <div className="bg-krakedblue/20 hover:bg-krakedblue/45 ease-in transition-all duration-300 shadow p-6">
               <h3 className="text-lg font-semibold mb-2 text-krakedlight">
                 Today
               </h3>
@@ -115,9 +127,8 @@ export default function StatsPage() {
                 {stats.today.sessionCount} sessions
               </p>
             </div>
-
             {/* This Week Card */}
-            <div className="bg-krakedblue border-3 border-krakedlight shadow p-6">
+            <div className="bg-krakedblue/20 hover:bg-krakedblue/45 ease-in transition-all duration-300 shadow p-6">
               <h3 className="text-lg font-semibold mb-2 text-krakedlight">
                 This Week
               </h3>
@@ -130,7 +141,6 @@ export default function StatsPage() {
             </div>
           </div>
         </div>
-
         {/* Right side: Image spanning full height */}
         <div className="w-64 shrink-0">
           <Image
@@ -143,56 +153,20 @@ export default function StatsPage() {
         </div>
       </div>
 
-      {/* Chart + Recent Sessions side-by-side */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 items-stretch">
-        {/* Left: This Week by Subject (chart) */}
-        <div className="bg-krakedblue border-3 border-krakedlight shadow p-6 w-full flex flex-col">
-          {/* make chart fill its area */}
-          <div className="w-full flex-1">
-            <StatsChart data={stats.bySubject} />
-          </div>
-        </div>
+      {/* Weekly Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+        {/* Weekly Overview Chart */}
+        <WeeklyChart data={stats.dailyData || []} />
 
-        {/* Right: Recent Sessions */}
-        <div className="bg-krakedblue border-3 border-krakedlight shadow p-6 w-full flex flex-col">
-          <h3 className="text-xl font-semibold mb-4">Recent Sessions</h3>
-
-          {stats.recentSessions.length === 0 ? (
-            <p className="text-krakedlight">No sessions yet. Start studying!</p>
-          ) : (
-            <div className="overflow-x-auto flex-1">
-              <table className="w-full">
-                <thead className="bg-white">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
-                      Subject
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
-                      Duration
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">
-                      Date
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {stats.recentSessions.map((session) => (
-                    <tr key={session.id} className="hover:bg-krakedblue2">
-                      <td className="px-4 py-3 text-sm">{session.tag}</td>
-                      <td className="px-4 py-3 text-sm">
-                        {Math.floor(session.duration / 60)} min
-                      </td>
-                      <td className="px-4 py-3 text-sm">
-                        {new Date(session.createdAt).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        {/* Pie Chart */}
+        <SubjectPieChart data={stats.bySubject} />
       </div>
+
+      {/* Activity Heatmap with Insights */}
+      <ActivityHeatmap
+        data={stats.monthActivity || []}
+        insights={stats.insights}
+      />
     </div>
   );
 }
