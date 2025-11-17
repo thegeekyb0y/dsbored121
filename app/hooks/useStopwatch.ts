@@ -11,14 +11,11 @@ interface StopwatchState {
   formattedTime: string;
 }
 
-export default function useStopwatch(
-  initialSeconds: number = 0
-): StopwatchState {
-  const [elapsedSeconds, setElapsedSeconds] = useState(initialSeconds);
+export default function useStopwatch(): StopwatchState {
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-
-  const startTimeRef = useRef<number>(Date.now() - initialSeconds * 1000);
-  const pausedTimeRef = useRef<number>(initialSeconds);
+  const startTimeRef = useRef<number>(0);
+  const pausedTimeRef = useRef<number>(0);
 
   useEffect(() => {
     if (isRunning) {
@@ -48,7 +45,7 @@ export default function useStopwatch(
   const resetTimer = () => {
     setElapsedSeconds(0);
     setIsRunning(false);
-    startTimeRef.current = Date.now();
+    startTimeRef.current = 0;
     pausedTimeRef.current = 0;
   };
 
