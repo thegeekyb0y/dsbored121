@@ -11,11 +11,14 @@ interface StopwatchState {
   formattedTime: string;
 }
 
-export default function useStopwatch(): StopwatchState {
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+export default function useStopwatch(
+  initialSeconds: number = 0
+): StopwatchState {
+  const [elapsedSeconds, setElapsedSeconds] = useState(initialSeconds);
   const [isRunning, setIsRunning] = useState(false);
-  const startTimeRef = useRef<number>(0);
-  const pausedTimeRef = useRef<number>(0);
+
+  const startTimeRef = useRef<number>(Date.now() - initialSeconds * 1000);
+  const pausedTimeRef = useRef<number>(initialSeconds);
 
   useEffect(() => {
     if (isRunning) {
@@ -39,13 +42,13 @@ export default function useStopwatch(): StopwatchState {
 
   const pauseTimer = () => {
     setIsRunning(false);
-    pausedTimeRef.current = elapsedSeconds; // Remember where we paused
+    pausedTimeRef.current = elapsedSeconds;
   };
 
   const resetTimer = () => {
     setElapsedSeconds(0);
     setIsRunning(false);
-    startTimeRef.current = 0;
+    startTimeRef.current = Date.now();
     pausedTimeRef.current = 0;
   };
 
@@ -57,11 +60,11 @@ export default function useStopwatch(): StopwatchState {
     if (hours > 0) {
       return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
         2,
-        "0",
+        "0"
       )}:${String(remainingSeconds).padStart(2, "0")}`;
     }
     return `${String(minutes).padStart(2, "0")}:${String(
-      remainingSeconds,
+      remainingSeconds
     ).padStart(2, "0")}`;
   };
 

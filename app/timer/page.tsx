@@ -5,8 +5,7 @@ import { useState } from "react";
 import ModeSelector from "../components/ModeSelector";
 import SubjectSelect from "../components/SubjectSelect";
 import UnifiedTimer from "../components/UnifiedTimer";
-import { PauseComp } from "../components/PauseComp";
-import { Clock, PlayIcon, Plus, PlusCircleIcon } from "lucide-react";
+import { PlayIcon } from "lucide-react";
 
 export default function TimerPage() {
   const { data: session } = useSession();
@@ -33,6 +32,14 @@ export default function TimerPage() {
     resetState();
   };
 
+  // 🔥 NEW: Handle when a session is restored from the database
+  const handleSessionRestored = (restoredTag: string) => {
+    setSubject(restoredTag);
+    setTimerActive(true);
+    setShowSubjectSelect(false);
+    console.log(`Session restored with subject: ${restoredTag}`);
+  };
+
   const resetState = () => {
     setTimerActive(false);
     setShowSubjectSelect(false);
@@ -40,7 +47,7 @@ export default function TimerPage() {
   };
 
   return (
-    <div className="px-4 py-8 w-full  bg-krakedblue/30 cursor-grab border-3 border-krakedlight/45 ">
+    <div className="px-4 py-8 w-full bg-krakedblue/30 cursor-grab border-3 border-krakedlight/45">
       <h1 className="text-4xl font-bold text-center mb-8">Study Timer</h1>
 
       <div className="flex flex-col items-center">
@@ -62,13 +69,13 @@ export default function TimerPage() {
               <button
                 onClick={handleSubjectConfirm}
                 disabled={!subject}
-                className="flex-1 bg-krakedblue2 hover:bg-krakedblue2/50 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3  font-semibold"
+                className="flex-1 bg-krakedblue2 hover:bg-krakedblue2/50 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 font-semibold"
               >
                 Confirm
               </button>
               <button
                 onClick={() => setShowSubjectSelect(false)}
-                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3  font-semibold"
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 font-semibold"
               >
                 Cancel
               </button>
@@ -80,18 +87,19 @@ export default function TimerPage() {
         {!timerActive ? (
           <button
             onClick={handleStartClick}
-            className="bg-green-700 hover:bg-green-800 border-2 flex items-center gap-4 border-krakedlight text-white px-8 py-6  font-bold text-2xl"
+            className="bg-green-700 hover:bg-green-800 border-2 flex items-center gap-4 border-krakedlight text-white px-8 py-6 font-bold text-2xl"
           >
             <PlayIcon className="w-6 h-6" />
             Start Study Session
           </button>
         ) : (
           <>
-            {/* Unified Timer */}
+            {/* Unified Timer with restoration callback */}
             <UnifiedTimer
               mode={mode}
               onComplete={handleComplete}
               subject={subject}
+              onSessionRestored={handleSessionRestored}
             />
 
             {saving && (

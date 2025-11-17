@@ -27,7 +27,6 @@ interface ActiveSessionState {
   pausedAt: string | null;
 }
 
-// 2. Interface to fix the Pusher 'session-started' any error (Line 83)
 interface SessionStartedData {
   userId: string;
   startedAt: string;
@@ -35,7 +34,6 @@ interface SessionStartedData {
   completedToday: number;
 }
 
-// 3. Interface to fix the fetchActiveSessions 'any' error (Line 185)
 interface ActiveSession extends ActiveSessionState {
   userId: string;
 }
@@ -252,7 +250,7 @@ export default function RoomPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="bg-krakedbg shadow p-6 mb-6 rounded-lg">
+      <div className="bg-krakedblue/20 border border-krakedlight/30 shadow p-6 mb-6 ">
         <div className="flex justify-between">
           <h1 className="text-3xl font-bold mb-2">{roomData.room.name}</h1>
           <p className="text-krakedblue2 mb-4">
@@ -271,14 +269,14 @@ export default function RoomPage() {
           </p>
           <button
             onClick={handleCopy}
-            className="mt-2 bg-krakedblue px-4 py-2 rounded-lg text-white hover:bg-krakedblue/80 transition"
+            className="mt-2 bg-krakedblue px-4 py-2 rounded-xs text-white hover:bg-krakedblue/80 transition"
           >
             Copy Room Code
           </button>
         </div>
       </div>
 
-      <div className="bg-krakedbg shadow p-6 rounded-lg">
+      <div className="bg-krakedblue/20 shadow p-6 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">
           Members ({roomData.members.length})
         </h2>
@@ -295,7 +293,7 @@ export default function RoomPage() {
             return (
               <div
                 key={member.id}
-                className={`flex items-center gap-3 p-3 transition-colors rounded-lg ${
+                className={`flex items-center gap-3 p-3 transition-colors ${
                   isSelf
                     ? "bg-krakedblue/80 border border-krakedyellow"
                     : "bg-krakedblue/60"
@@ -307,8 +305,8 @@ export default function RoomPage() {
                     isActive
                       ? "bg-green-500 animate-pulse"
                       : isPaused
-                      ? "bg-yellow-500" // Yellow for paused
-                      : "bg-gray-500" // Gray for offline
+                      ? "bg-yellow-500"
+                      : "bg-gray-500"
                   }`}
                   title={isActive ? "Active" : isPaused ? "Paused" : "Offline"}
                 />
@@ -320,7 +318,7 @@ export default function RoomPage() {
                     width={40}
                     height={40}
                     className="w-10 h-10 rounded-full object-cover"
-                    unoptimized={true} // Assuming external images might not need optimization
+                    unoptimized={true}
                   />
                 ) : (
                   <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-xs text-white font-bold">

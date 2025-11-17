@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Users, Calendar, Plus, ArrowRight } from "lucide-react";
+import { Users, Calendar, Plus, ArrowRight, LogIn } from "lucide-react"; // Added LogIn icon
 import { RoomsSkeleton } from "@/app/components/RoomsSkeleton";
 
 interface Room {
@@ -22,8 +22,12 @@ export default function RoomsListPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Only fetch rooms if session exists
     if (session) {
       fetchMyRooms();
+    } else {
+      // If no session, stop loading state but don't proceed to fetch
+      setLoading(false);
     }
   }, [session]);
 
@@ -39,6 +43,32 @@ export default function RoomsListPage() {
     }
   };
 
+  // --- NEW UNATHENTICATED STATE CHECK ---
+  if (!session && !loading) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-12">
+        <div className="bg-krakedblue/20 border-2 border-krakedlight/50 p-12 text-center shadow-2xl">
+          <LogIn className="w-12 h-12 text-green-400 mx-auto mb-6" />
+          <h2 className="text-3xl font-bold mb-3 text-white">
+            Access Study Rooms
+          </h2>
+          <p className="text-gray-400 mb-8">
+            You need to be logged in to **create or join** study rooms and
+            collaborate with others.
+          </p>
+          <button
+            onClick={() => router.push("/api/auth/signin")}
+            className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-8 py-4 font-bold text-lg transition-colors mx-auto"
+          >
+            <LogIn className="w-5 h-5" />
+            Log In to Continue
+          </button>
+        </div>
+      </div>
+    );
+  }
+  // -----------------------------------------
+
   // Use skeleton component instead of inline loading
   if (loading) {
     return <RoomsSkeleton />;
@@ -46,6 +76,8 @@ export default function RoomsListPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
+      {/* ... (Rest of the component remains the same, handling authenticated and empty states) ... */}
+
       {/* Header with Create Button */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -68,7 +100,7 @@ export default function RoomsListPage() {
         </button>
       </div>
 
-      {/* Empty State */}
+      {/* Empty State / Rooms Grid */}
       {rooms.length === 0 ? (
         <div className="bg-[#1a1a1a] border border-gray-800 p-12 text-center">
           <div className="max-w-md mx-auto">

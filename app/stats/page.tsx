@@ -142,7 +142,7 @@ export default function StatsPage() {
           </div>
         </div>
         {/* Right side: Image spanning full height */}
-        <div className="w-64 shrink-0">
+        <div className="w-64 shrink-0 md:block hidden">
           <Image
             src="/statsfocus.jpg"
             alt="A detailed pencil sketch of a character by a fire."
