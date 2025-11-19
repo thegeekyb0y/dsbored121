@@ -8,7 +8,7 @@ import UnifiedTimer from "../components/UnifiedTimer";
 import { PlayIcon } from "lucide-react";
 
 export default function TimerPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [mode, setMode] = useState<"focus" | "pomodoro">("focus");
   const [subject, setSubject] = useState("");
   const [saving, setSaving] = useState(false);
@@ -32,7 +32,7 @@ export default function TimerPage() {
     resetState();
   };
 
-  // 🔥 NEW: Handle when a session is restored from the database
+  // Handle when a session is restored from the database (Logged in only)
   const handleSessionRestored = (restoredTag: string) => {
     setSubject(restoredTag);
     setTimerActive(true);
@@ -46,8 +46,29 @@ export default function TimerPage() {
     setSubject("");
   };
 
+  // --- 🚀 DEFAULT LAYOUT (Guest Mode) ---
+  if (status === "unauthenticated") {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center border-t-3 border-krakedlight/45 min-h-[70vh] gap-4 bg-linear-to-b from-krakedblue/40 to-krakedbg/0 ">
+        <div className="text-4xl font-bold pt-8 pb-4 self-center">
+          {" "}
+          Study Timer
+        </div>
+        <ModeSelector mode={mode} onModeChange={setMode} />
+
+        <UnifiedTimer
+          mode={mode}
+          onComplete={() => {}}
+          subject="Guest Session"
+          isGuest={true}
+        />
+      </div>
+    );
+  }
+
+  // --- 🔒 LOGGED IN LAYOUT (Unchanged) ---
   return (
-    <div className="px-4 py-8 w-full bg-krakedblue/30 cursor-grab border-3 border-krakedlight/45">
+    <div className="px-4 py-8 w-full  cursor-grab border-t-3 border-krakedlight/45 bg-linear-to-b from-krakedblue/30 to-krakedblue/0">
       <h1 className="text-4xl font-bold text-center mb-8">Study Timer</h1>
 
       <div className="flex flex-col items-center">
@@ -111,7 +132,7 @@ export default function TimerPage() {
         )}
       </div>
 
-      {!session && (
+      {!session && status !== "loading" && (
         <div className="mt-8 text-center text-gray-400">
           <p>💡 Login to track your study sessions and see stats!</p>
         </div>

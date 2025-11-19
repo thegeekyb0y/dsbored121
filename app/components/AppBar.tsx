@@ -27,7 +27,7 @@ export function AppBar() {
             width={40}
             height={40}
             className="w-8 h-8 rounded-full object-cover"
-            unoptimized={true} // Assuming external images might not need optimization
+            unoptimized={true}
           />
           <Link href={"/"}> Kraked </Link>
         </div>
@@ -62,6 +62,12 @@ export function AppBar() {
                 onClick={handleRoomCreations}
               >
                 Create Room
+              </button>
+              <button
+                className="px-2 py-1  cursor-pointer text-gray-300 hover:text-white font-medium transition-colors"
+                onClick={handleStatsClick}
+              >
+                Stats
               </button>
               <button
                 className="px-2 py-1 cursor-pointer bg-gray-400/20 text-white font-medium hover:bg-gray-400/40 transition-colors"

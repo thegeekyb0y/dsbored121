@@ -6,39 +6,8 @@ import Image from "next/image";
 import WeeklyChart from "../components/WeeklyChart";
 import SubjectPieChart from "../components/SubjectPie";
 import ActivityHeatmap from "../components/ActivityComponent";
-
-interface StatsData {
-  today: {
-    totalMinutes: number;
-    sessionCount: number;
-  };
-  week: {
-    totalMinutes: number;
-    sessionCount: number;
-  };
-  bySubject: Array<{
-    tag: string;
-    minutes: number;
-    count: number;
-  }>;
-  dailyData: Array<{
-    date: string;
-    day: string;
-    minutes: number;
-  }>;
-  monthActivity: Array<{
-    date: string;
-    minutes: number;
-  }>;
-  insights: {
-    currentStreak: number;
-    longestStreak: number;
-    longestStreakDate: string;
-    mostActiveDay: string;
-    mostActiveTime: string;
-    mostStudiedSubject: string;
-  };
-}
+import { Lock, LogIn } from "lucide-react";
+import { DUMMY_STATS, StatsData } from "@/lib/dummystats";
 
 export default function StatsPage() {
   const { data: session, status } = useSession();
@@ -50,6 +19,8 @@ export default function StatsPage() {
     if (status === "authenticated") {
       fetchStats();
     } else if (status === "unauthenticated") {
+      // Use imported dummy data for guest view
+      setStats(DUMMY_STATS);
       setLoading(false);
     }
   }, [status]);
@@ -68,6 +39,8 @@ export default function StatsPage() {
     }
   };
 
+  const isGuest = status === "unauthenticated";
+
   if (status === "loading" || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -76,21 +49,7 @@ export default function StatsPage() {
     );
   }
 
-  if (!session) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <p className="text-xl">You need to login to access your stats.</p>
-        <button
-          onClick={() => signIn()}
-          className="bg-blue-600 text-white px-6 py-3"
-        >
-          Login
-        </button>
-      </div>
-    );
-  }
-
-  if (error) {
+  if (error && !isGuest) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-red-600">Error: {error}</div>
@@ -98,74 +57,109 @@ export default function StatsPage() {
     );
   }
 
-  if (!stats) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div>Loading...</div>
-      </div>
-    );
-  }
+  if (!stats) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-12 py-12">
-      {/* Top Section: Heading + Stats Cards + Image */}
-      <div className="flex gap-6 mb-12">
-        {/* Left side: Heading + Stats Cards */}
-        <div className="flex-1">
-          <h1 className="text-4xl font-bold mb-8">Your Study Stats</h1>
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Today Card */}
-            <div className="bg-krakedblue/20 hover:bg-krakedblue/45 ease-in transition-all duration-300 shadow p-6">
-              <h3 className="text-lg font-semibold mb-2 text-krakedlight">
-                Today
-              </h3>
-              <div className="text-4xl font-bold text-white mb-2">
-                {stats.today.totalMinutes} min
-              </div>
-              <p className="text-krakedlight/80">
-                {stats.today.sessionCount} sessions
-              </p>
+    <div className="relative min-h-screen">
+      {/* 🔒 Locked Overlay for Guests */}
+      {isGuest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop with simple click-to-login */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-[2px] cursor-pointer"
+            onClick={() => signIn()}
+          />
+
+          {/* Floating Glass Card */}
+          <div className="relative bg-black/60 border border-white/10 backdrop-blur-xl p-8 rounded-2xl shadow-2xl max-w-md text-center transform transition-all hover:scale-105">
+            <div className="w-16 h-16 bg-krakedblue/50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Lock className="w-8 h-8 text-white" />
             </div>
-            {/* This Week Card */}
-            <div className="bg-krakedblue/20 hover:bg-krakedblue/45 ease-in transition-all duration-300 shadow p-6">
-              <h3 className="text-lg font-semibold mb-2 text-krakedlight">
-                This Week
-              </h3>
-              <div className="text-4xl font-bold text-white mb-2">
-                {stats.week.totalMinutes} min
-              </div>
-              <p className="text-krakedlight/80">
-                {stats.week.sessionCount} sessions
-              </p>
+
+            <h2 className="text-2xl font-bold text-white mb-2">
+              Unlock Your Insights
+            </h2>
+            <p className="text-gray-300 mb-8">
+              Log in to view your detailed study patterns, track your streaks,
+              and visualize your progress.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => signIn()}
+                className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center gap-2 transition-colors"
+              >
+                <LogIn className="w-5 h-5" />
+                Login to View Stats
+              </button>
+              <button
+                onClick={() => (window.location.href = "/")}
+                className="w-full bg-transparent hover:bg-white/5 text-gray-400 font-semibold py-3 px-6 rounded-lg transition-colors"
+              >
+                Back to Timer
+              </button>
             </div>
           </div>
         </div>
-        {/* Right side: Image spanning full height */}
-        <div className="w-64 shrink-0 md:block hidden">
-          <Image
-            src="/statsfocus.jpg"
-            alt="A detailed pencil sketch of a character by a fire."
-            layout="responsive"
-            width={400}
-            height={400}
-          />
+      )}
+
+      {/* Main Content - Blurred if Guest */}
+      <div
+        className={`max-w-7xl mx-auto px-12 py-12 transition-all duration-500 ${
+          isGuest ? "blur-md opacity-60 pointer-events-none select-none" : ""
+        }`}
+      >
+        {/* Top Section: Heading + Stats Cards + Image */}
+        <div className="flex gap-6 mb-12">
+          <div className="flex-1">
+            <h1 className="text-4xl font-bold mb-8">Your Study Stats</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-krakedblue/20 shadow p-6 border border-white/5">
+                <h3 className="text-lg font-semibold mb-2 text-krakedlight">
+                  Today
+                </h3>
+                <div className="text-4xl font-bold text-white mb-2">
+                  {stats.today.totalMinutes} min
+                </div>
+                <p className="text-krakedlight/80">
+                  {stats.today.sessionCount} sessions
+                </p>
+              </div>
+              <div className="bg-krakedblue/20 shadow p-6 border border-white/5">
+                <h3 className="text-lg font-semibold mb-2 text-krakedlight">
+                  This Week
+                </h3>
+                <div className="text-4xl font-bold text-white mb-2">
+                  {stats.week.totalMinutes} min
+                </div>
+                <p className="text-krakedlight/80">
+                  {stats.week.sessionCount} sessions
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="w-64 shrink-0 md:block hidden">
+            <Image
+              src="/statsfocus.jpg"
+              alt="Focus Character"
+              width={400}
+              height={400}
+              className="rounded-lg grayscale opacity-80"
+            />
+          </div>
         </div>
+
+        {/* Weekly Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+          <WeeklyChart data={stats.dailyData || []} />
+          <SubjectPieChart data={stats.bySubject} />
+        </div>
+
+        <ActivityHeatmap
+          data={stats.monthActivity || []}
+          insights={stats.insights}
+        />
       </div>
-
-      {/* Weekly Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-        {/* Weekly Overview Chart */}
-        <WeeklyChart data={stats.dailyData || []} />
-
-        {/* Pie Chart */}
-        <SubjectPieChart data={stats.bySubject} />
-      </div>
-
-      <ActivityHeatmap
-        data={stats.monthActivity || []}
-        insights={stats.insights}
-      />
     </div>
   );
 }
