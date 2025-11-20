@@ -41,6 +41,11 @@ model User {
   email           String?         @unique
   emailVerified   DateTime?
   image           String?
+  bio             String?
+  status          String?
+  spotifylink     String?
+  avatarId        String?
+  themeId         String?
   accounts        Account[]
   sessions        Session[]
   studySessions   StudySession[]
