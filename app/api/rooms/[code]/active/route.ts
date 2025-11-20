@@ -77,7 +77,7 @@ export async function GET(
       },
       include: {
         user: {
-          select: { id: true, name: true, image: true },
+          select: { id: true, name: true, image: true, avatarId: true },
         },
       },
     });

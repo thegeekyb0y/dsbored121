@@ -3,10 +3,11 @@
 import LiveTimer from "@/app/components/LiveTimer";
 import { RoomDetailSkeleton } from "@/app/components/RoomsSkeleton";
 import { usePusher } from "@/app/hooks/usePusher";
+import { getAvatarById } from "@/lib/constants";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react"; // 1. Added useCallback
+import { useEffect, useState, useCallback } from "react";
 
 interface Member {
   id: string;
@@ -16,6 +17,7 @@ interface Member {
     name: string | null;
     email: string | null;
     image: string | null;
+    avatarId?: string | null; // 🔥 Added avatarId
   };
 }
 
@@ -59,6 +61,18 @@ const formatDuration = (seconds: number): string => {
     .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
 
+// 🔥 Helper to determine which image to show
+const getUserImage = (user: {
+  image?: string | null;
+  avatarId?: string | null;
+}) => {
+  if (user.avatarId) {
+    const avatar = getAvatarById(user.avatarId);
+    if (avatar) return avatar.src;
+  }
+  return user.image;
+};
+
 export default function RoomPage() {
   const params = useParams();
   const { data: session } = useSession();
@@ -76,7 +90,6 @@ export default function RoomPage() {
     {}
   );
 
-  // 4. Wrapped fetch functions in useCallback to fix react-hooks/exhaustive-deps warning
   const fetchRoomData = useCallback(async () => {
     try {
       const response = await fetch(`/api/rooms/${code}`);
@@ -100,9 +113,8 @@ export default function RoomPage() {
       const data = await response.json();
 
       if (response.ok && data.activeSessions) {
-        const sessionsMap = new Map<string, ActiveSessionState>(); // Added Map types
+        const sessionsMap = new Map<string, ActiveSessionState>();
 
-        // 5. Replaced 'any' with ActiveSession type (Fixes Error on original Line 185)
         data.activeSessions.forEach((s: ActiveSession) => {
           sessionsMap.set(s.userId, {
             startedAt: s.startedAt,
@@ -114,7 +126,7 @@ export default function RoomPage() {
           // Update local study durations map from initial fetch data
           setStudyDurations((prev) => ({
             ...prev,
-            [s.userId]: data.studyDurationToday[s.userId] || 0, // Use the separate studyDurationToday map
+            [s.userId]: data.studyDurationToday[s.userId] || 0,
           }));
         });
         setActiveSessions(sessionsMap);
@@ -128,7 +140,7 @@ export default function RoomPage() {
     } catch (error) {
       console.error("Failed to fetch active sessions:", error);
     }
-  }, [code]); // Dependencies include 'code' and state setters
+  }, [code]);
 
   useEffect(() => {
     // Initialize/Update member study durations from the initial fetch
@@ -138,7 +150,6 @@ export default function RoomPage() {
   }, [roomData]);
 
   useEffect(() => {
-    // 6. Included fetch functions in dependency array (Fixes React Hook warning on original Line 77)
     fetchRoomData();
     fetchActiveSessions();
   }, [code, fetchRoomData, fetchActiveSessions]);
@@ -147,7 +158,6 @@ export default function RoomPage() {
     if (!channel) return;
 
     // --- Start Listener ---
-    // 7. Replaced 'any' with SessionStartedData type (Fixes Error on original Line 83)
     channel.bind("session-started", (data: SessionStartedData) => {
       setActiveSessions((prev) => {
         const updated = new Map(prev);
@@ -208,7 +218,7 @@ export default function RoomPage() {
           if (session) {
             updated.set(data.userId, {
               ...session,
-              startedAt: data.newStartedAt, // Crucial for client-side LiveTimer correction
+              startedAt: data.newStartedAt,
               isPaused: false,
               pausedAt: null,
             });
@@ -226,8 +236,6 @@ export default function RoomPage() {
     };
   }, [channel]);
 
-  // Original fetchRoomData and fetchActiveSessions functions are now the useCallback definitions above.
-
   if (loading) return <RoomDetailSkeleton />;
   if (error) return <div>Error: {error}</div>;
   if (!roomData) return <div>Room not found</div>;
@@ -238,7 +246,6 @@ export default function RoomPage() {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(roomData.room.code);
     } else {
-      // Fallback for non-secure contexts or older browsers
       const el = document.createElement("textarea");
       el.value = roomData.room.code;
       document.body.appendChild(el);
@@ -286,9 +293,11 @@ export default function RoomPage() {
             const activeSession = activeSessions.get(member.user.id);
             const isActive = !!activeSession && !activeSession.isPaused;
             const isPaused = !!activeSession && activeSession.isPaused;
-            // Get today's total study duration (for active and offline users)
             const studyDuration = studyDurations[member.user.id] || 0;
             const isSelf = session?.user?.id === member.user.id;
+
+            // 🔥 Use helper to get correct image URL
+            const userImageSrc = getUserImage(member.user);
 
             return (
               <div
@@ -311,20 +320,22 @@ export default function RoomPage() {
                   title={isActive ? "Active" : isPaused ? "Paused" : "Offline"}
                 />
 
-                {member.user.image ? (
-                  <Image
-                    src={member.user.image}
-                    alt={member.user.name || "User"}
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-full object-cover"
-                    unoptimized={true}
-                  />
-                ) : (
-                  <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-xs text-white font-bold">
-                    {member.user.name ? member.user.name[0] : "U"}
-                  </div>
-                )}
+                {/* 🔥 UPDATED: Avatar Rendering */}
+                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-700 shrink-0">
+                  {userImageSrc ? (
+                    <Image
+                      src={userImageSrc}
+                      alt={member.user.name || "User"}
+                      fill
+                      className="object-cover"
+                      unoptimized={true} // Keep for external/preset images
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs text-white font-bold">
+                      {member.user.name ? member.user.name[0] : "U"}
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex-1">
                   <p className="font-medium text-white">
@@ -338,7 +349,6 @@ export default function RoomPage() {
 
                   {isActive ? (
                     <div className="flex items-center gap-2">
-                      {/* LiveTimer handles the running count and starts from completedToday */}
                       <LiveTimer
                         startedAt={activeSession.startedAt}
                         completedToday={activeSession.completedToday}
@@ -357,7 +367,6 @@ export default function RoomPage() {
                       </span>
                     </p>
                   ) : (
-                    // Offline with study time (Grey status, updated duration)
                     <p className="text-sm text-gray-500">
                       Offline
                       <span className="ml-2 text-gray-400">

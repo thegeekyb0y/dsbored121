@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Lexend_Deca } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./provider";
-import AppLayout from "./components/AppLayout"; //
+import AppLayout from "./components/AppLayout";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const Lexend = Lexend_Deca({
   weight: "300",
@@ -27,7 +29,11 @@ export default function RootLayout({
       >
         <Providers>
           {/* Use the AppLayout component to wrap the entire application content */}
-          <AppLayout>{children}</AppLayout>
+          <AppLayout>
+            {children}
+            <Analytics />
+            <SpeedInsights />
+          </AppLayout>
         </Providers>
       </body>
     </html>
