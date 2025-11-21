@@ -60,7 +60,7 @@ export default function ProfilePage() {
 
       if (!res.ok) throw new Error("Failed to save");
 
-      await update(); // Refresh NextAuth session
+      await update();
       router.refresh();
       alert("Profile updated!");
     } catch (error) {
@@ -86,7 +86,7 @@ export default function ProfilePage() {
         </p>
         <button
           onClick={() => router.push("/api/auth/signin")}
-          className="bg-green-600 px-6 py-3 rounded text-white font-bold"
+          className="bg-green-600 px-6 py-3 text-white font-bold"
         >
           Log In
         </button>
@@ -95,7 +95,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
+    <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
@@ -110,7 +110,7 @@ export default function ProfilePage() {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white px-6 py-2.5 rounded-full font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-green-500/20"
+          className="flex items-center gap-2 bg-krakedgreen2 hover:bg-green-700 text-white px-6 py-2.5 font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-green-500/20"
         >
           {isSaving ? (
             "Saving..."
@@ -126,7 +126,7 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Avatar Selection */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6">
+          <div className="bg-krakedblue/30 border-t-3 border-gray-500 hover:border-green-600 p-6">
             <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
               <User className="w-5 h-5 text-krakedblue2" />
               Choose Avatar
@@ -137,10 +137,10 @@ export default function ProfilePage() {
                 <button
                   key={avatar.id}
                   onClick={() => setSelectedAvatar(avatar.id)}
-                  className={`group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 ${
+                  className={`group relative aspect-square  overflow-hidden border-3 transition-all duration-200 ${
                     selectedAvatar === avatar.id
-                      ? "border-green-500 scale-105 shadow-[0_0_15px_rgba(34,197,94,0.3)]"
-                      : "border-transparent bg-black/20 hover:border-gray-600"
+                      ? "border-green-500 scale-105 shadow-[0_0_15px_rgba(34,197,94,0.3)] rounded-full"
+                      : "border-transparent bg-black/20 hover:border-blue-400 rounded-full"
                   }`}
                 >
                   <Image
@@ -161,7 +161,7 @@ export default function ProfilePage() {
 
         {/* Right Column: Text Fields */}
         <div className="space-y-6">
-          <div className="bg-[#1a1a1a] border border-gray-800 rounded-2xl p-6 space-y-5">
+          <div className="bg-krakedblue/30 border-gray-500 border-t-3 hover:border-green-600 p-6 space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">
                 Display Name
@@ -170,7 +170,7 @@ export default function ProfilePage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-3 rounded-lg bg-black/40 border border-gray-700 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none text-white transition-all placeholder:text-gray-600"
+                className="w-full p-3 bg-black/40 border rounded-sm border-gray-700 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none text-white transition-all placeholder:text-gray-600"
                 placeholder="Your Name"
               />
             </div>
@@ -184,7 +184,7 @@ export default function ProfilePage() {
                 value={userStatus}
                 onChange={(e) => setUserStatus(e.target.value)}
                 placeholder="e.g. Grinding Algorithms ⚡️"
-                className="w-full p-3 rounded-lg bg-black/40 border border-gray-700 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none text-white transition-all placeholder:text-gray-600"
+                className="w-full p-3 rounded-sm bg-black/40 border border-gray-700 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none text-white transition-all placeholder:text-gray-600"
               />
               <p className="text-xs text-gray-500 mt-1.5">
                 Visible to others in study rooms.
@@ -199,7 +199,7 @@ export default function ProfilePage() {
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Tell us about yourself..."
-                className="w-full p-3 rounded-lg bg-black/40 border border-gray-700 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none text-white transition-all min-h-[120px] resize-none placeholder:text-gray-600"
+                className="w-full p-3 rounded-sm bg-black/40 border border-gray-700 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none text-white transition-all min-h-[120px] resize-none placeholder:text-gray-600"
               />
             </div>
           </div>
