@@ -7,13 +7,12 @@ import SubjectSelect from "../components/SubjectSelect";
 import UnifiedTimer from "../components/UnifiedTimer";
 import { PlayIcon } from "lucide-react";
 
-// Add prop interface
-interface TimerPageProps {
+export default function TimerPage({
+  onSessionComplete,
+}: {
   onSessionComplete?: () => void;
-}
-
-export default function TimerPage({ onSessionComplete }: TimerPageProps) {
-  const { data: session, status } = useSession();
+}) {
+  const { status } = useSession();
   const [mode, setMode] = useState<"focus" | "pomodoro">("focus");
   const [subject, setSubject] = useState("");
   const [timerActive, setTimerActive] = useState(false);
