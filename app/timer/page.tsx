@@ -7,11 +7,15 @@ import SubjectSelect from "../components/SubjectSelect";
 import UnifiedTimer from "../components/UnifiedTimer";
 import { PlayIcon } from "lucide-react";
 
-export default function TimerPage() {
+// Add prop interface
+interface TimerPageProps {
+  onSessionComplete?: () => void;
+}
+
+export default function TimerPage({ onSessionComplete }: TimerPageProps) {
   const { data: session, status } = useSession();
   const [mode, setMode] = useState<"focus" | "pomodoro">("focus");
   const [subject, setSubject] = useState("");
-  const [saving, setSaving] = useState(false);
   const [timerActive, setTimerActive] = useState(false);
   const [showSubjectSelect, setShowSubjectSelect] = useState(false);
 
@@ -29,33 +33,25 @@ export default function TimerPage() {
   };
 
   const handleComplete = () => {
-    resetState();
+    setTimerActive(false);
+    setShowSubjectSelect(false);
+    setSubject("");
+    // Trigger callback to refresh stats on home page
+    if (onSessionComplete) onSessionComplete();
   };
 
-  // Handle when a session is restored from the database (Logged in only)
   const handleSessionRestored = (restoredTag: string) => {
     setSubject(restoredTag);
     setTimerActive(true);
     setShowSubjectSelect(false);
-    console.log(`Session restored with subject: ${restoredTag}`);
   };
 
-  const resetState = () => {
-    setTimerActive(false);
-    setShowSubjectSelect(false);
-    setSubject("");
-  };
-
-  // --- 🚀 DEFAULT LAYOUT (Guest Mode) ---
+  // --- GUEST LAYOUT ---
   if (status === "unauthenticated") {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center border-t-3 border-krakedlight/45 min-h-[70vh] gap-4 bg-linear-to-b from-krakedblue/40 to-krakedbg/0 ">
-        <div className="text-4xl font-bold pt-8 pb-4 self-center">
-          {" "}
-          Study Timer
-        </div>
+      <div className="w-full flex flex-col items-center justify-center gap-4 bg-linear-to-b from-krakedblue/40 to-krakedbg/0 py-10 rounded-xl border border-krakedlight/20">
+        <div className="text-4xl font-bold pt-4 pb-2">Study Timer</div>
         <ModeSelector mode={mode} onModeChange={setMode} />
-
         <UnifiedTimer
           mode={mode}
           onComplete={() => {}}
@@ -66,37 +62,31 @@ export default function TimerPage() {
     );
   }
 
-  // --- 🔒 LOGGED IN LAYOUT (Unchanged) ---
+  // --- AUTHENTICATED LAYOUT ---
   return (
-    <div className="px-4 py-8 w-full  cursor-grab border-t-3 border-krakedlight/45 bg-linear-to-b from-krakedblue/30 to-krakedblue/0">
+    <div className="w-full flex flex-col items-center bg-linear-to-b from-krakedblue/30 to-krakedblue/0 py-8 rounded-xl border border-krakedlight/20">
       <h1 className="text-4xl font-bold text-center mb-8">Study Timer</h1>
 
-      <div className="flex flex-col items-center">
-        {/* Mode Selector - Always visible */}
+      <div className="flex flex-col items-center w-full max-w-3xl">
         <ModeSelector
           mode={mode}
-          onModeChange={(newMode) => {
-            if (!timerActive) {
-              setMode(newMode);
-            }
-          }}
+          onModeChange={(newMode) => !timerActive && setMode(newMode)}
         />
 
-        {/* Subject Selection Modal/Dropdown */}
         {showSubjectSelect && (
-          <div className="w-full max-w-sm mb-6 p-6 bg-gray-800">
+          <div className="w-full max-w-sm mb-6 p-6 bg-gray-800 rounded-lg shadow-xl z-20">
             <SubjectSelect value={subject} onChange={setSubject} />
             <div className="flex gap-4 mt-4">
               <button
                 onClick={handleSubjectConfirm}
                 disabled={!subject}
-                className="flex-1 bg-krakedblue2 hover:bg-krakedblue2/50 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 font-semibold"
+                className="flex-1 bg-krakedblue2 hover:bg-krakedblue2/80 text-white px-4 py-2 rounded-md font-semibold disabled:opacity-50"
               >
-                Confirm
+                Start
               </button>
               <button
                 onClick={() => setShowSubjectSelect(false)}
-                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 font-semibold"
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md font-semibold"
               >
                 Cancel
               </button>
@@ -104,39 +94,23 @@ export default function TimerPage() {
           </div>
         )}
 
-        {/* Timer or Start Button */}
         {!timerActive ? (
           <button
             onClick={handleStartClick}
-            className="bg-green-700 hover:bg-green-800 border-2 flex items-center gap-4 border-krakedlight text-white px-8 py-6 font-bold text-2xl"
+            className="bg-green-700 hover:bg-green-800 border-2 flex items-center gap-4 border-krakedlight text-white px-8 py-6 font-bold text-2xl rounded-2xl shadow-lg transition-transform hover:scale-105 active:scale-95"
           >
-            <PlayIcon className="w-6 h-6" />
-            Start Study Session
+            <PlayIcon className="w-8 h-8" />
+            Start Session
           </button>
         ) : (
-          <>
-            {/* Unified Timer with restoration callback */}
-            <UnifiedTimer
-              mode={mode}
-              onComplete={handleComplete}
-              subject={subject}
-              onSessionRestored={handleSessionRestored}
-            />
-
-            {saving && (
-              <p className="text-center mt-4 text-gray-400">
-                Saving session...
-              </p>
-            )}
-          </>
+          <UnifiedTimer
+            mode={mode}
+            onComplete={handleComplete}
+            subject={subject}
+            onSessionRestored={handleSessionRestored}
+          />
         )}
       </div>
-
-      {!session && status !== "loading" && (
-        <div className="mt-8 text-center text-gray-400">
-          <p>💡 Login to track your study sessions and see stats!</p>
-        </div>
-      )}
     </div>
   );
 }

@@ -30,6 +30,7 @@ export function AppBar() {
             className="w-8 h-8 rounded-full object-cover"
             unoptimized={true}
           />
+
           <Link href={"/"}> Kraked </Link>
         </div>
 

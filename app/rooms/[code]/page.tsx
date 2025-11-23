@@ -6,8 +6,9 @@ import { usePusher } from "@/app/hooks/usePusher";
 import { getAvatarById } from "@/lib/constants";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
+import { ArrowLeft } from "lucide-react";
 
 interface Member {
   id: string;
@@ -17,7 +18,7 @@ interface Member {
     name: string | null;
     email: string | null;
     image: string | null;
-    avatarId?: string | null; // 🔥 Added avatarId
+    avatarId?: string | null;
   };
 }
 
@@ -61,7 +62,7 @@ const formatDuration = (seconds: number): string => {
     .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
 
-// 🔥 Helper to determine which image to show
+// 櫨 Helper to determine which image to show
 const getUserImage = (user: {
   image?: string | null;
   avatarId?: string | null;
@@ -75,6 +76,7 @@ const getUserImage = (user: {
 
 export default function RoomPage() {
   const params = useParams();
+  const router = useRouter();
   const { data: session } = useSession();
   const code = params.code as string;
   const { channel } = usePusher(`room-${code}`);
@@ -258,17 +260,20 @@ export default function RoomPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="bg-krakedblue/20 border border-krakedlight/30 shadow p-6 mb-6 ">
-        <div className="flex justify-between">
-          <h1 className="text-3xl font-bold mb-2">{roomData.room.name}</h1>
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-4 mb-2">
+            <button
+              onClick={() => router.back()}
+              className="p-2 hover:bg-white/10 rounded-full transition"
+            >
+              <ArrowLeft className="w-6 h-6 text-white" />
+            </button>
+            <h1 className="text-3xl font-bold">{roomData.room.name}</h1>
+          </div>
           <p className="text-krakedblue2 mb-4">
             Room Code: {roomData.room.code}
           </p>
         </div>
-        {isHost && (
-          <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-            Host
-          </span>
-        )}
 
         <div className="mt-2">
           <p className="text-sm text-krakedlight">
@@ -296,7 +301,6 @@ export default function RoomPage() {
             const studyDuration = studyDurations[member.user.id] || 0;
             const isSelf = session?.user?.id === member.user.id;
 
-            // 🔥 Use helper to get correct image URL
             const userImageSrc = getUserImage(member.user);
 
             return (
@@ -320,7 +324,7 @@ export default function RoomPage() {
                   title={isActive ? "Active" : isPaused ? "Paused" : "Offline"}
                 />
 
-                {/* 🔥 UPDATED: Avatar Rendering */}
+                {/* 櫨 UPDATED: Avatar Rendering */}
                 <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-700 shrink-0">
                   {userImageSrc ? (
                     <Image
@@ -354,7 +358,7 @@ export default function RoomPage() {
                         completedToday={activeSession.completedToday}
                         className="text-green-400 font-semibold text-sm"
                       />
-                      <span className="text-gray-400">·</span>
+                      <span className="text-gray-400">ﾂｷ</span>
                       <span className="text-xs text-gray-400">
                         {activeSession.tag}
                       </span>

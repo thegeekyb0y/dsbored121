@@ -2,15 +2,17 @@
 
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import WeeklyChart from "../components/WeeklyChart";
 import SubjectPieChart from "../components/SubjectPie";
 import ActivityHeatmap from "../components/ActivityComponent";
-import { Lock, LogIn } from "lucide-react";
+import { Lock, LogIn, ArrowLeft } from "lucide-react";
 import { DUMMY_STATS, StatsData } from "@/lib/dummystats";
 
 export default function StatsPage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
@@ -112,7 +114,15 @@ export default function StatsPage() {
         {/* Top Section: Heading + Stats Cards + Image */}
         <div className="flex gap-6 mb-12">
           <div className="flex-1">
-            <h1 className="text-4xl font-bold mb-8">Your Study Stats</h1>
+            <div className="flex items-center gap-4 mb-8">
+              <button
+                onClick={() => router.back()}
+                className="p-2 hover:bg-white/10 rounded-full transition"
+              >
+                <ArrowLeft className="w-6 h-6 text-white" />
+              </button>
+              <h1 className="text-4xl font-bold">Your Study Stats</h1>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-krakedblue/20 shadow p-6 border border-white/5">
                 <h3 className="text-lg font-semibold mb-2 text-krakedlight">
