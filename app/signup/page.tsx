@@ -8,7 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function SignupPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   // Redirect if already logged in
@@ -128,7 +128,7 @@ export default function SignupPage() {
             {/* Quote or Text on Image */}
             <div className="absolute bottom-8 left-8 right-8 text-white">
               <blockquote className="font-medium text-lg mb-2">
-                "The future depends on what you do today."
+                &quot;The future depends on what you do today.&quot;
               </blockquote>
               <cite className="text-sm text-gray-400 not-italic">
                 - Mahatma Gandhi

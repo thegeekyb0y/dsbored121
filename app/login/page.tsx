@@ -8,7 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   // Redirect if already logged in
@@ -95,7 +95,7 @@ export default function LoginPage() {
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-[#131212] px-2 text-gray-500">
-                      Don't have an account ?
+                      Don&apos;t have an account ?
                     </span>
                   </div>
                 </div>
@@ -114,7 +114,7 @@ export default function LoginPage() {
           {/* Right Side: Image (1/3) */}
           <div className="hidden lg:block lg:w-1/3 relative bg-gray-900">
             <Image
-              src="/statsfocus.jpg" // Using an existing image from your assets as placeholder or the one you want
+              src="/statsfocus.jpg"
               alt="Study Atmosphere"
               fill
               className="object-cover opacity-80"
@@ -127,8 +127,8 @@ export default function LoginPage() {
             {/* Quote or Text on Image */}
             <div className="absolute bottom-8 left-8 right-8 text-white">
               <blockquote className="font-medium text-lg mb-2">
-                "Success is the sum of small efforts, repeated day in and day
-                out."
+                &quot;Success is the sum of small efforts, repeated day in and
+                day out.&quot;
               </blockquote>
               <cite className="text-sm text-gray-400 not-italic">
                 - Robert Collier
