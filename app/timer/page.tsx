@@ -7,11 +7,7 @@ import SubjectSelect from "../components/SubjectSelect";
 import UnifiedTimer from "../components/UnifiedTimer";
 import { PlayIcon } from "lucide-react";
 
-export default function TimerPage({
-  onSessionComplete,
-}: {
-  onSessionComplete?: () => void;
-}) {
+export default function TimerPage() {
   const { status } = useSession();
   const [mode, setMode] = useState<"focus" | "pomodoro">("focus");
   const [subject, setSubject] = useState("");
@@ -35,8 +31,6 @@ export default function TimerPage({
     setTimerActive(false);
     setShowSubjectSelect(false);
     setSubject("");
-    // Trigger callback to refresh stats on home page
-    if (onSessionComplete) onSessionComplete();
   };
 
   const handleSessionRestored = (restoredTag: string) => {
