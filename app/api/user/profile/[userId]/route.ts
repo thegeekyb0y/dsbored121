@@ -11,13 +11,10 @@ export async function GET(
     const params = await props.params;
     const { userId } = params;
 
-    // Optional: Check if user is authenticated
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    // Fetch the user's public profile
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -38,8 +35,7 @@ export async function GET(
     return NextResponse.json({
       user: {
         ...user,
-        // Hide email from other users for privacy
-        email: userId === (session.user as any).id ? user.email : null,
+        email: userId === session.user.id ? user.email : null,
       },
     });
   } catch (error) {

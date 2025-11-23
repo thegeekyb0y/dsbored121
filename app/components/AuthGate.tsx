@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signIn } from "next-auth/react";
-import { Lock } from "lucide-react";
+import { Lock, UserLock } from "lucide-react";
 import { ReactNode } from "react";
 
 interface AuthGateProps {
@@ -22,15 +22,21 @@ export default function AuthGate({
     <div className="relative h-full w-full">
       {/* Overlay for Guests */}
       {isGuest && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-6 text-center bg-black/40 backdrop-blur-[3px] rounded-xl border border-white/10 transition-all duration-500">
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-6 text-center bg-black/40 backdrop-blur-[3px] border border-white/10 transition-all duration-500">
           <div className="bg-black/60 p-6 rounded-2xl border border-white/5 shadow-2xl flex flex-col items-center">
-            <div className="bg-gray-800/50 p-3 rounded-full mb-4">
-              <Lock className="w-8 h-8 text-gray-300" />
+            <div className="flex">
+              <div className="w-16 h-16 flex items-center justify-center mx-auto mb-6">
+                <UserLock className="w-8 h-8 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <h3 className="text-xl font-bold text-white mb-2 text-left">
+                  {title}
+                </h3>
+                <p className="text-sm text-gray-400 mb-6 max-w-fit text-left">
+                  {description}
+                </p>
+              </div>
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-            <p className="text-sm text-gray-400 mb-6 max-w-[250px]">
-              {description}
-            </p>
             <button
               onClick={() => signIn()}
               className="bg-green-600 hover:bg-green-500 text-white px-6 py-2.5 rounded-full font-semibold text-sm transition-all transform hover:scale-105 shadow-lg shadow-green-900/20"

@@ -4,12 +4,18 @@ import { useEffect, useState } from "react";
 import WeeklyChart from "./WeeklyChart";
 import { RefreshCw } from "lucide-react";
 
+interface DayData {
+  date: string;
+  day: string;
+  minutes: number;
+}
+
 export default function WeeklyStatsWidget({
   refreshTrigger,
 }: {
   refreshTrigger: number;
 }) {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<DayData[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchStats = async () => {
@@ -32,12 +38,12 @@ export default function WeeklyStatsWidget({
   }, [refreshTrigger]);
 
   return (
-    <div className="h-full flex flex-col bg-krakedblue/20 border border-krakedlight/20 rounded-xl p-6 shadow-lg backdrop-blur-md">
+    <div className="h-full flex flex-col bg-krakedblue/20 border border-krakedlight/20 p-6 shadow-lg backdrop-blur-md">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold text-white">Weekly Progress</h3>
         <button
           onClick={fetchStats}
-          className={`p-2 hover:bg-white/10 rounded-full transition-colors ${
+          className={`p-2 hover:bg-white/10 transition-colors ${
             loading ? "animate-spin" : ""
           }`}
         >
@@ -45,7 +51,7 @@ export default function WeeklyStatsWidget({
         </button>
       </div>
 
-      <div className="flex-1 min-h-[300px] w-full">
+      <div className="flex-1 h-auto w-full">
         {loading && data.length === 0 ? (
           <div className="h-full flex items-center justify-center text-gray-500">
             Loading...

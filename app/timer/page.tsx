@@ -49,7 +49,7 @@ export default function TimerPage({ onSessionComplete }: TimerPageProps) {
   // --- GUEST LAYOUT ---
   if (status === "unauthenticated") {
     return (
-      <div className="w-full flex flex-col items-center justify-center gap-4 bg-linear-to-b from-krakedblue/40 to-krakedbg/0 py-10 rounded-xl border border-krakedlight/20">
+      <div className="w-full flex flex-col items-center justify-center gap-4 bg-linear-to-b from-krakedblue/40 to-krakedbg/10 py-10 border border-krakedlight/20">
         <div className="text-4xl font-bold pt-4 pb-2">Study Timer</div>
         <ModeSelector mode={mode} onModeChange={setMode} />
         <UnifiedTimer
@@ -64,7 +64,7 @@ export default function TimerPage({ onSessionComplete }: TimerPageProps) {
 
   // --- AUTHENTICATED LAYOUT ---
   return (
-    <div className="w-full flex flex-col items-center bg-linear-to-b from-krakedblue/30 to-krakedblue/0 py-8 rounded-xl border border-krakedlight/20">
+    <div className="w-full flex flex-col items-center bg-linear-to-b from-krakedblue/30 to-krakedblue/0 py-8 border border-krakedlight/20">
       <h1 className="text-4xl font-bold text-center mb-8">Study Timer</h1>
 
       <div className="flex flex-col items-center w-full max-w-3xl">
@@ -74,7 +74,7 @@ export default function TimerPage({ onSessionComplete }: TimerPageProps) {
         />
 
         {showSubjectSelect && (
-          <div className="w-full max-w-sm mb-6 p-6 bg-gray-800 rounded-lg shadow-xl z-20">
+          <div className="w-full max-w-sm mb-6 p-6 bg-gray-800 shadow-xl z-20">
             <SubjectSelect value={subject} onChange={setSubject} />
             <div className="flex gap-4 mt-4">
               <button
@@ -97,10 +97,10 @@ export default function TimerPage({ onSessionComplete }: TimerPageProps) {
         {!timerActive ? (
           <button
             onClick={handleStartClick}
-            className="bg-green-700 hover:bg-green-800 border-2 flex items-center gap-4 border-krakedlight text-white px-8 py-6 font-bold text-2xl rounded-2xl shadow-lg transition-transform hover:scale-105 active:scale-95"
+            className="bg-green-700 hover:bg-green-800 border-2 flex items-center gap-4 border-krakedlight text-white px-8 py-6 font-bold text-2xl shadow-lg transition-transform hover:scale-105 active:scale-95"
           >
             <PlayIcon className="w-8 h-8" />
-            Start Session
+            Start Study Session
           </button>
         ) : (
           <UnifiedTimer

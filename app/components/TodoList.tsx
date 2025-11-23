@@ -12,15 +12,17 @@ import {
 interface Todo {
   id: string;
   title: string;
-  isCompleted: boolean;
+  completed: boolean;
   priority: "HIGH" | "MEDIUM" | "LOW";
   dueDate: string | null;
 }
 
+type Priority = "HIGH" | "MEDIUM" | "LOW";
+
 export default function TodoList() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState("");
-  const [priority, setPriority] = useState<"HIGH" | "MEDIUM" | "LOW">("MEDIUM");
+  const [priority, setPriority] = useState<Priority>("MEDIUM");
   const [dueDate, setDueDate] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -36,12 +38,11 @@ export default function TodoList() {
   const handleAdd = async () => {
     if (!newTodo.trim()) return;
 
-    // Optimistic Update
     const tempId = Date.now().toString();
     const optimisticTodo: Todo = {
       id: tempId,
       title: newTodo,
-      isCompleted: false,
+      completed: false,
       priority,
       dueDate: dueDate ? new Date(dueDate).toISOString() : null,
     };
@@ -65,20 +66,21 @@ export default function TodoList() {
         const { todo } = await res.json();
         setTodos((prev) => prev.map((t) => (t.id === tempId ? todo : t)));
       }
-    } catch (e) {
+    } catch {
+      // Removed unused 'e'
       setTodos((prev) => prev.filter((t) => t.id !== tempId));
     }
   };
 
   const toggleComplete = async (id: string, currentStatus: boolean) => {
     setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, isCompleted: !currentStatus } : t))
+      prev.map((t) => (t.id === id ? { ...t, completed: !currentStatus } : t))
     );
 
     await fetch(`/api/todos/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isCompleted: !currentStatus }),
+      body: JSON.stringify({ completed: !currentStatus }),
     });
   };
 
@@ -118,7 +120,7 @@ export default function TodoList() {
         <div className="flex gap-3 items-center">
           <select
             value={priority}
-            onChange={(e) => setPriority(e.target.value as any)}
+            onChange={(e) => setPriority(e.target.value as Priority)}
             className="bg-gray-800 text-xs text-white px-3 py-1.5 rounded border border-gray-600 outline-none focus:border-green-500"
           >
             <option value="HIGH">High Priority</option>
@@ -156,16 +158,16 @@ export default function TodoList() {
             <div
               key={todo.id}
               className={`group flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 ${
-                todo.isCompleted
+                todo.completed
                   ? "bg-black/20 border-transparent opacity-60"
                   : "bg-krakedblue/10 border-white/5 hover:border-white/10 hover:bg-krakedblue/20"
               }`}
             >
               <button
-                onClick={() => toggleComplete(todo.id, todo.isCompleted)}
+                onClick={() => toggleComplete(todo.id, todo.completed)}
                 className="text-gray-400 hover:text-green-400 transition-colors"
               >
-                {todo.isCompleted ? (
+                {todo.completed ? (
                   <CheckCircle2 className="w-5 h-5 text-green-500" />
                 ) : (
                   <Circle className="w-5 h-5" />
@@ -175,9 +177,7 @@ export default function TodoList() {
               <div className="flex-1 min-w-0">
                 <p
                   className={`truncate ${
-                    todo.isCompleted
-                      ? "line-through text-gray-500"
-                      : "text-white"
+                    todo.completed ? "line-through text-gray-500" : "text-white"
                   }`}
                 >
                   {todo.title}

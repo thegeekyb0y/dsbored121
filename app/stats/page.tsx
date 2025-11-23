@@ -7,7 +7,13 @@ import Image from "next/image";
 import WeeklyChart from "../components/WeeklyChart";
 import SubjectPieChart from "../components/SubjectPie";
 import ActivityHeatmap from "../components/ActivityComponent";
-import { Lock, LogIn, ArrowLeft } from "lucide-react";
+import {
+  Lock,
+  LogIn,
+  ArrowLeft,
+  SquaresIntersect,
+  LucideTextSearch,
+} from "lucide-react";
 import { DUMMY_STATS, StatsData } from "@/lib/dummystats";
 
 export default function StatsPage() {
@@ -73,7 +79,7 @@ export default function StatsPage() {
           <div className="relative bg-krakedblue/20  backdrop-blur-xl p-8 border-t-3 border-x-krakedlight/20 shadow-2xl max-w-md text-center transform transition-all hover:scale-105">
             <div className="flex">
               <div className="w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                <Lock className="w-8 h-8 text-white" />
+                <LucideTextSearch className="w-8 h-8 text-white" />
               </div>
 
               <div className="flex flex-col">

@@ -12,16 +12,18 @@ export async function PATCH(
   if (!session?.user?.email)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { title, isCompleted, priority, dueDate } = await req.json();
+  // CHANGE 1: Destructure 'completed' instead of 'isCompleted'
+  const { title, completed, priority, dueDate } = await req.json();
 
   const updated = await prisma.todo.updateMany({
     where: {
       id: params.id,
-      user: { email: session.user.email }, // Ensure ownership
+      user: { email: session.user.email },
     },
     data: {
       ...(title !== undefined && { title }),
-      ...(isCompleted !== undefined && { isCompleted }),
+      // CHANGE 2: Use the correct database field name 'completed'
+      ...(completed !== undefined && { completed }),
       ...(priority !== undefined && { priority }),
       ...(dueDate !== undefined && {
         dueDate: dueDate ? new Date(dueDate) : null,
