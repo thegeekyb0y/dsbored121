@@ -100,7 +100,7 @@ export default function TodoList() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-krakedblue/20 border border-krakedlight/20 rounded-xl p-6 shadow-lg backdrop-blur-md overflow-hidden">
+    <div className="h-full flex flex-col bg-krakedblue/20 border border-krakedlight/20  p-6 shadow-lg backdrop-blur-md overflow-hidden">
       <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
         <CheckCircle2 className="w-6 h-6 text-green-400" />
         Tasks

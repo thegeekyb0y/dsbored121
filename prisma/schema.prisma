@@ -46,6 +46,7 @@ model User {
   spotifylink     String?
   avatarId        String?
   themeId         String?
+  customSubjects  String[]        @default([])
   accounts        Account[]
   sessions        Session[]
   studySessions   StudySession[]

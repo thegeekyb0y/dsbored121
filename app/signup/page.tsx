@@ -115,7 +115,7 @@ export default function SignupPage() {
           {/* Right Side: Image (1/3) */}
           <div className="hidden lg:block lg:w-1/3 relative bg-gray-900">
             <Image
-              src="/signin.jpg"
+              src="/statsfocus.jpg"
               alt="Focus Atmosphere"
               fill
               className="object-cover opacity-80"

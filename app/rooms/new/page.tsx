@@ -92,12 +92,12 @@ export default function NewRoomPage() {
   const handler = mode === "create" ? handleCreate : handleJoin;
 
   return (
-    <div className="mx-auto max-w-sm bg-krakedgreen2 border-2 border-krakedlight  p-4 my-16 text-white">
-      <div className="flex justify-around mb-4 border-b-2 border-krakedlight">
+    <div className="mx-auto max-w-sm bg-krakedblue/20 border-2 border-krakedlight/60  p-4 my-16 text-white">
+      <div className="flex justify-around mb-4 border-b border-krakedlight">
         <button
-          className={`px-4 py-2 text-xl font-bold transition-colors ${
+          className={`px-4 py-2 text-xl font-bold transition-colors mb-3 ${
             mode === "create"
-              ? "text-white border-b-4 border-white"
+              ? "text-krakedlight bg-krakedblue/50 rounded-sm"
               : "text-gray-400 hover:text-white"
           }`}
           onClick={() => {
@@ -108,9 +108,9 @@ export default function NewRoomPage() {
           Create
         </button>
         <button
-          className={`px-4 py-2 text-xl font-bold transition-colors ${
+          className={`px-4 py-2 text-xl font-bold transition-colors mb-3  ${
             mode === "join"
-              ? "text-white border-b-4 border-white"
+              ? "text-krakedlight bg-krakedblue/50 rounded-sm"
               : "text-gray-400 hover:text-white"
           }`}
           onClick={() => {

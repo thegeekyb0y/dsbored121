@@ -114,7 +114,7 @@ export default function LoginPage() {
           {/* Right Side: Image (1/3) */}
           <div className="hidden lg:block lg:w-1/3 relative bg-gray-900">
             <Image
-              src="/statsfocus.jpg"
+              src="/signin.jpg"
               alt="Study Atmosphere"
               fill
               className="object-cover opacity-80"
