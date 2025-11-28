@@ -250,7 +250,7 @@ export default function UnifiedTimer({
 
       {/* --- Timer Display (Center) --- */}
       <div className="flex-1 flex items-center justify-center z-10">
-        <h1 className="text-7xl sm:text-8xl md:text-8xl font-bold text-white tracking-wider tabular-nums drop-shadow-2xl">
+        <h1 className="text-8xl font-bold text-white tracking-wider tabular-nums drop-shadow-2xl md:pb-8">
           {formattedTime}
         </h1>
       </div>

@@ -16,6 +16,14 @@ export function AppBar() {
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  const handleCloseMenu = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setMobileMenuOpen(false);
+      setIsClosing(false);
+    }, 200); // Match animation duration
+  };
+
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -55,14 +63,6 @@ export function AppBar() {
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
   }, [mobileMenuOpen]);
-
-  const handleCloseMenu = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setMobileMenuOpen(false);
-      setIsClosing(false);
-    }, 200); // Match animation duration
-  };
 
   const handleStatsClick = () => {
     router.push("/stats");
