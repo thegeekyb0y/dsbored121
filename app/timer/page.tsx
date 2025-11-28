@@ -95,9 +95,9 @@ export default function TimerPage() {
         {!timerActive ? (
           <button
             onClick={handleStartClick}
-            className="bg-green-700 hover:bg-green-800 border-2 flex items-center gap-4 border-krakedlight text-white px-8 py-4 md:py-6 font-bold text-2xl shadow-lg transition-transform hover:scale-105 active:scale-95 justify-center"
+            className="bg-green-700 hover:bg-green-800 border-2 flex items-center gap-4 border-krakedlight text-white px-4 md:px-8 py-4 md:py-6 font-bold text-2xl shadow-lg transition-transform hover:scale-105 active:scale-95 justify-center"
           >
-            <PlayIcon className="w-8 h-8" />
+            <PlayIcon className="w-6 h-6 md:w-8 md:h-8 fill-current" />
             Start Study Session
           </button>
         ) : (
