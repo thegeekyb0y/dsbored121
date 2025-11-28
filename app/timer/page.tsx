@@ -43,7 +43,6 @@ export default function TimerPage() {
   if (status === "unauthenticated") {
     return (
       <div className="w-full flex flex-col items-center justify-center gap-4 bg-linear-to-b from-krakedblue/40 to-krakedbg/10 py-6 md:py-10 border border-krakedlight/20 rounded-xl px-4">
-        {/* Hidden on mobile because UnifiedTimer has its own header now */}
         <div className="text-4xl font-bold pt-4 pb-2 hidden md:block">
           Study Timer
         </div>
@@ -96,7 +95,7 @@ export default function TimerPage() {
         {!timerActive ? (
           <button
             onClick={handleStartClick}
-            className="bg-green-700 hover:bg-green-800 border-2 flex items-center gap-4 border-krakedlight text-white px-8 py-6 font-bold text-2xl shadow-lg transition-transform hover:scale-105 active:scale-95 justify-center"
+            className="bg-green-700 hover:bg-green-800 border-2 flex items-center gap-4 border-krakedlight text-white px-8 py-4 md:py-6 font-bold text-2xl shadow-lg transition-transform hover:scale-105 active:scale-95 justify-center"
           >
             <PlayIcon className="w-8 h-8" />
             Start Study Session

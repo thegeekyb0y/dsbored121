@@ -12,7 +12,7 @@ export default function ModeSelector({
   onModeChange,
 }: ModeSelectorProps) {
   return (
-    <div className="flex gap-4 mb-8 ">
+    <div className="flex gap-4 mb-3 sm:mb-8 ">
       <button
         onClick={() => onModeChange("focus")}
         className={`px-4 py-3  font-semibold transition flex cursor-pointer items-center gap-3 ${

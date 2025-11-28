@@ -15,7 +15,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       {!shouldHideAppBar && <AppBar />}
       <main
         className={`p-2 ${
-          shouldHideAppBar ? "pt-2" : "pt-20"
+          shouldHideAppBar ? "pt-2" : "pt-8 md:pt-20"
         } max-w-7xl mx-auto`}
       >
         {children}

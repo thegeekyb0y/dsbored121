@@ -21,7 +21,7 @@ export function AppBar() {
     setTimeout(() => {
       setMobileMenuOpen(false);
       setIsClosing(false);
-    }, 200); // Match animation duration
+    }, 200);
   };
 
   // Close menu when clicking outside
