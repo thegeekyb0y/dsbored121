@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Plus, X } from "lucide-react";
 
-// Broader default subjects
 const DEFAULT_SUBJECTS = [
   "Computer Science",
   "Mathematics",

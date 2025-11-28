@@ -9,13 +9,9 @@ import AuthGate from "./components/AuthGate";
 export default function Home() {
   const [refreshStatsTrigger, setRefreshStatsTrigger] = useState(0);
 
-  // Note: We can't pass props to TimerPage anymore since it's a Next.js page component
-  // If you need to trigger stats refresh, consider using a global state management solution
-  // or event emitter pattern
-
   return (
-    <main className="relative min-h-screen overflow-x-hidden pb-12 px-4">
-      <section className="relative z-10 w-full mb-8 pt-10 px-6">
+    <main className="relative min-h-screen overflow-x-hidden pb-12 px md:px-4">
+      <section className="relative z-10 w-full mb-6 sm:mb-8 pt-6 sm:pt-10 sm:px-4 md:px-6">
         <TimerPage />
       </section>
 

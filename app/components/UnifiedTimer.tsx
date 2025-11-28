@@ -10,7 +10,7 @@ interface UnifiedTimerProps {
   onComplete: (durationSeconds: number) => void;
   subject: string;
   onSessionRestored?: (tag: string) => void;
-  isGuest?: boolean; // 🔥 NEW: Added prop for guest mode
+  isGuest?: boolean;
 }
 
 export default function UnifiedTimer({
@@ -18,7 +18,7 @@ export default function UnifiedTimer({
   onComplete,
   subject,
   onSessionRestored,
-  isGuest = false, // Default to false
+  isGuest = false,
 }: UnifiedTimerProps) {
   const [sessionActive, setSessionActive] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -29,7 +29,6 @@ export default function UnifiedTimer({
   const completionCalledRef = useRef(false);
   const hasRestoredRef = useRef(false);
 
-  // 🔥 STEP A: Fetch and restore active session on mount (Skip for guests)
   useEffect(() => {
     if (isGuest) {
       setIsInitializing(false);
@@ -43,7 +42,6 @@ export default function UnifiedTimer({
 
         if (data.activeSession) {
           const { startedAt, tag, isPaused, pausedAt } = data.activeSession;
-
           let elapsed: number;
 
           if (isPaused && pausedAt) {
@@ -70,10 +68,6 @@ export default function UnifiedTimer({
               stopwatch.startTimer();
             }, 100);
           }
-
-          console.log(
-            `✅ Session restored: ${elapsed}s elapsed, tag: ${tag}, paused: ${isPaused}`
-          );
         }
       } catch (error) {
         console.error("Failed to restore session:", error);
@@ -86,16 +80,13 @@ export default function UnifiedTimer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 🔥 STEP B: Auto-stop and save on page unload (Skip for guests)
   useEffect(() => {
     if (isGuest) return;
 
     const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
       if (sessionActive) {
         e.preventDefault();
-        e.returnValue =
-          "You have an active study session. It will be stopped and saved automatically.";
-
+        e.returnValue = "";
         const blob = new Blob([JSON.stringify({})], {
           type: "application/json",
         });
@@ -107,14 +98,11 @@ export default function UnifiedTimer({
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [sessionActive, isGuest]);
 
-  // Pomodoro completion logic
   useEffect(() => {
     if (mode !== "pomodoro") return;
-
     if (pomodoro.timeLeft === pomodoro.initialDuration) {
       completionCalledRef.current = false;
     }
-
     if (pomodoro.timeLeft === 0 && !completionCalledRef.current) {
       completionCalledRef.current = true;
       onComplete(pomodoro.initialDuration);
@@ -131,12 +119,9 @@ export default function UnifiedTimer({
 
   const handlePause = async () => {
     pauseTimer();
-
-    if (isGuest) return; // Skip API call for guests
-
+    if (isGuest) return;
     try {
       await fetch("/api/sessions/pause", { method: "POST" });
-      console.log("✅ Session paused");
     } catch (error) {
       console.error("Failed to pause session:", error);
     }
@@ -144,12 +129,9 @@ export default function UnifiedTimer({
 
   const handleResume = async () => {
     startTimer();
-
-    if (isGuest) return; // Skip API call for guests
-
+    if (isGuest) return;
     try {
       await fetch("/api/sessions/resume", { method: "POST" });
-      console.log("✅ Session resumed");
     } catch (error) {
       console.error("Failed to resume session:", error);
     }
@@ -157,7 +139,6 @@ export default function UnifiedTimer({
 
   const handleStop = async () => {
     pauseTimer();
-
     const durationToSave =
       mode === "focus"
         ? stopwatch.elapsedSeconds
@@ -166,7 +147,6 @@ export default function UnifiedTimer({
     if (!isGuest) {
       try {
         await fetch("/api/sessions/stop", { method: "POST" });
-        console.log(`✅ Session stopped and saved: ${durationToSave}s`);
       } catch (error) {
         console.error("Failed to stop session:", error);
       }
@@ -186,16 +166,13 @@ export default function UnifiedTimer({
   const handleStart = async () => {
     startTimer();
     setSessionActive(true);
-
-    if (isGuest) return; // Skip API call for guests
-
+    if (isGuest) return;
     try {
       await fetch("/api/sessions/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tag: subject }),
       });
-      console.log(`✅ Session started: ${subject}`);
     } catch (error) {
       console.error("Failed to start session:", error);
     }
@@ -203,67 +180,108 @@ export default function UnifiedTimer({
 
   if (isInitializing) {
     return (
-      <div className="bg-krakedblue/40 w-full max-w-lg p-8 text-center">
+      <div className="bg-krakedblue/40 w-fit max-w-lg p-2 text-center ">
         <p className="text-gray-400">Loading session...</p>
       </div>
     );
   }
-
-  return (
-    <div className="bg-krakedblue/40 w-full max-w-lg p-8 text-center transition-all duration-500 ease-in-out">
-      <h1 className="text-8xl font-bold text-white mb-8 tracking-wider">
-        {formattedTime}
-      </h1>
-
-      {/* Hide subject for guests to keep it minimal */}
-      {!isGuest && (
-        <p className="text-gray-300 mb-4">Subject: {subject || "—"}</p>
+  const renderButtons = () => (
+    <>
+      {!isRunning ? (
+        <button
+          onClick={isInitialState ? handleStart : handleResume}
+          className="bg-[#40c057] hover:bg-[#40c057]/80 border-2 flex items-center justify-center gap-2 border-krakedlight text-white p-3 md:px-4 md:py-4 font-semibold text-lg transition-transform active:scale-95  shadow-lg"
+          title="Start"
+        >
+          <PlayIcon className="w-6 h-6 md:w-5 md:h-5" />
+          <span className="hidden md:inline">
+            {isInitialState ? "Start" : "Resume"}
+          </span>
+        </button>
+      ) : (
+        <button
+          onClick={handlePause}
+          className="bg-yellow-600 hover:bg-yellow-700 border-2 flex items-center justify-center gap-2 border-krakedlight text-white p-3 md:px-4 md:py-4 font-semibold text-lg transition-transform active:scale-95 shadow-lg"
+          title="Pause"
+        >
+          <PauseIcon className="w-6 h-6 md:w-5 md:h-5" />
+          <span className="hidden md:inline">Pause</span>
+        </button>
       )}
 
-      <div className="flex gap-4 justify-center">
-        {!isRunning ? (
-          <button
-            onClick={isInitialState ? handleStart : handleResume}
-            className="bg-[#40c057] hover:bg-[#40c057]/80 border-2 flex items-center gap-3 border-krakedlight text-white px-4 py-4 font-semibold text-lg transition-transform active:scale-95"
-          >
-            <PlayIcon width={20} height={20} />
-            {isInitialState ? "Start" : "Resume"}
-          </button>
-        ) : (
-          <button
-            onClick={handlePause}
-            className="bg-yellow-600 hover:bg-yellow-700 border-2 flex items-center gap-3 border-krakedlight text-white px-4 py-4 font-semibold text-lg transition-transform active:scale-95"
-          >
-            <PauseIcon width={20} height={20} />
-            Pause
-          </button>
-        )}
-
-        {/* For guests, 'Stop & Save' becomes just 'Stop' visually */}
-        <button
-          onClick={handleStop}
-          disabled={
-            (mode === "focus" && stopwatch.elapsedSeconds === 0) ||
-            (mode === "pomodoro" &&
-              pomodoro.timeLeft === pomodoro.initialDuration)
-          }
-          className="bg-blue-600 hover:bg-blue-700 border-2 flex items-center gap-2 border-krakedlight text-white px-4 py-4 font-semibold text-lg disabled:bg-gray-600 disabled:cursor-not-allowed transition-transform active:scale-95"
-        >
-          <SaveAllIcon width={20} height={20} />
+      <button
+        onClick={handleStop}
+        disabled={
+          (mode === "focus" && stopwatch.elapsedSeconds === 0) ||
+          (mode === "pomodoro" &&
+            pomodoro.timeLeft === pomodoro.initialDuration)
+        }
+        className="bg-blue-600 hover:bg-blue-700 border-2 flex items-center justify-center gap-2 border-krakedlight text-white p-3 md:px-4 md:py-4 font-semibold text-lg disabled:bg-gray-600 disabled:cursor-not-allowed transition-transform active:scale-95 shadow-lg"
+        title="Stop & Save"
+      >
+        <SaveAllIcon className="w-6 h-6 md:w-5 md:h-5" />
+        <span className="hidden md:inline">
           {isGuest ? "Stop" : "Stop & Save"}
-        </button>
+        </span>
+      </button>
 
-        <button
-          onClick={resetTimer}
-          className="bg-gray-600 hover:bg-gray-700 border-2 border-krakedlight flex items-center gap-2 text-white px-4 py-4 font-semibold text-lg transition-transform active:scale-95"
-        >
-          <RedoIcon width={20} height={20} />
-          Reset
-        </button>
+      <button
+        onClick={resetTimer}
+        className="bg-gray-600 hover:bg-gray-700 border-2 border-krakedlight flex items-center justify-center gap-2 text-white p-3 md:px-4 md:py-4 font-semibold text-lg transition-transform active:scale-95 shadow-lg"
+        title="Reset"
+      >
+        <RedoIcon className="w-6 h-6 md:w-5 md:h-5" />
+        <span className="hidden md:inline">Reset</span>
+      </button>
+    </>
+  );
+
+  return (
+    <div className="bg-krakedblue/40 w-full max-w-lg p-6 md:p-8 transition-all duration-500 ease-in-out rounded-xl flex flex-col justify-between min-h-[350px] md:min-h-0 md:block relative overflow-hidden">
+      {/* --- Mobile Header (Corners) --- */}
+      <div className="flex md:hidden justify-between items-start mb-4 z-10">
+        <h2 className="text-2xl font-bold text-white tracking-tight">
+          Study Timer
+        </h2>
+        <span className="text-xs font-semibold text-gray-300 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md">
+          {mode === "focus" ? "Focus Mode" : "Pomodoro"}
+        </span>
+      </div>
+
+      {/* --- Timer Display (Center) --- */}
+      <div className="flex-1 flex items-center justify-center z-10">
+        <h1 className="text-7xl sm:text-8xl md:text-8xl font-bold text-white tracking-wider tabular-nums drop-shadow-2xl">
+          {formattedTime}
+        </h1>
+      </div>
+
+      {/* --- Desktop Subject (Centered Below Timer) --- */}
+      {!isGuest && (
+        <p className="hidden md:block text-gray-300 mb-4 text-center mt-4">
+          Subject: {subject || "—"}
+        </p>
+      )}
+
+      {/* --- Bottom Section --- */}
+      <div className="flex items-end justify-between md:justify-center w-full z-10 mt-auto md:mt-0">
+        {/* Controls (Left on Mobile, Center on Desktop) */}
+        <div className="flex gap-3 md:gap-4">{renderButtons()}</div>
+
+        {/* Mobile Subject (Right Corner) */}
+        {!isGuest && (
+          <div className="block md:hidden text-right max-w-[140px]">
+            <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold mb-0.5">
+              Studying
+            </p>
+            <p className="text-white text-md font-bold truncate leading-tight">
+              {subject || "No Subject"}
+            </p>
+          </div>
+        )}
       </div>
 
       {mode === "focus" && (
-        <p className="text-gray-400 mt-4">
+        <p className="hidden md:block text-gray-400 mt-4 text-center text-sm">
           {stopwatch.elapsedSeconds} seconds elapsed
         </p>
       )}

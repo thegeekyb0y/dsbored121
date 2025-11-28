@@ -5,78 +5,261 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UserAvatarMenu } from "./UserAvatarMenu";
+import { useState, useEffect, useRef } from "react";
+import { Menu, X } from "lucide-react";
 
 export function AppBar() {
   const session = useSession();
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileMenuOpen &&
+        menuRef.current &&
+        buttonRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        handleCloseMenu();
+      }
+    };
+
+    if (mobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      // Prevent body scroll when menu is open
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "unset";
+    };
+  }, [mobileMenuOpen]);
+
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && mobileMenuOpen) {
+        handleCloseMenu();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [mobileMenuOpen]);
+
+  const handleCloseMenu = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setMobileMenuOpen(false);
+      setIsClosing(false);
+    }, 200); // Match animation duration
+  };
 
   const handleStatsClick = () => {
     router.push("/stats");
+    handleCloseMenu();
   };
 
   const handleRoomCreations = () => {
     router.push("/rooms/");
+    handleCloseMenu();
   };
 
   return (
-    <div className="fixed top-0 left-0 w-full z-50 p-4">
-      <div className="flex justify-between bg-neutral-900 border border-krakedlight/50 items-center mx-auto px-4 py-2 backdrop-blur-3xl max-w-6xl">
-        <div className="flex flex-row gap-2 p-2 m-2 font-bold cursor-pointer font-mono text-white items-center">
-          <Image
-            src={"/krakedlogo.png"}
-            alt={"Logo"}
-            width={40}
-            height={40}
-            className="w-8 h-8 rounded-full object-cover"
-            unoptimized={true}
-          />
+    <>
+      {/* Backdrop overlay for mobile menu */}
+      {mobileMenuOpen && (
+        <div
+          className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-200 ${
+            isClosing ? "opacity-0" : "opacity-100"
+          }`}
+          onClick={handleCloseMenu}
+        />
+      )}
 
-          <Link href={"/"}> Kraked </Link>
+      <div className="fixed top-0 left-0 w-full z-50 p-2 sm:p-4">
+        <div className="flex justify-between bg-neutral-900 border border-krakedlight/50 items-center mx-auto px-3 sm:px-4 py-2 backdrop-blur-3xl max-w-6xl">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 p-1 sm:p-2 font-bold font-mono text-white hover:text-green-400 transition-colors"
+          >
+            <Image
+              src="/krakedlogo.png"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="w-6 h-6 sm:w-8 sm:h-8 rounded-full object-cover"
+              unoptimized
+            />
+            <span className="hidden sm:inline">Kraked</span>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-4">
+            {session.data?.user ? (
+              <>
+                <button
+                  className="px-3 py-1.5 cursor-pointer bg-green-500/40 text-white font-medium hover:bg-green-500/60 transition-colors text-sm rounded-sm"
+                  onClick={handleRoomCreations}
+                >
+                  Rooms
+                </button>
+                <button
+                  className="px-3 py-1.5 cursor-pointer text-gray-300 hover:text-white font-medium transition-colors text-sm"
+                  onClick={handleStatsClick}
+                >
+                  Stats
+                </button>
+                <UserAvatarMenu />
+              </>
+            ) : (
+              <>
+                <button
+                  className="px-3 py-1.5 cursor-pointer bg-green-500/40 text-white font-medium hover:bg-green-500/60 transition-colors text-sm rounded-sm"
+                  onClick={handleRoomCreations}
+                >
+                  Rooms
+                </button>
+                <button
+                  className="px-3 py-1.5 cursor-pointer text-gray-300 hover:text-white font-medium transition-colors text-sm"
+                  onClick={handleStatsClick}
+                >
+                  Stats
+                </button>
+                <button
+                  className="px-3 py-1.5 cursor-pointer bg-gray-400/20 text-white font-medium hover:bg-gray-400/40 transition-colors text-sm rounded-sm"
+                  onClick={() => signIn()}
+                >
+                  Sign In
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            ref={buttonRef}
+            className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+            onClick={() => {
+              if (mobileMenuOpen) {
+                handleCloseMenu();
+              } else {
+                setMobileMenuOpen(true);
+              }
+            }}
+            aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6 transition-transform duration-200 rotate-90" />
+            ) : (
+              <Menu className="w-6 h-6 transition-transform duration-200" />
+            )}
+          </button>
         </div>
 
-        <div className="flex items-center gap-4">
-          {session.data?.user ? (
-            <>
-              <button
-                className="px-3 py-1.5 cursor-pointer bg-green-500/40 text-white font-medium hover:bg-green-500/60 transition-colors"
-                onClick={handleRoomCreations}
-              >
-                Rooms
-              </button>
-              <button
-                className="px-3 py-1.5 cursor-pointer text-gray-300 hover:text-white font-medium transition-colors"
-                onClick={handleStatsClick}
-              >
-                Stats
-              </button>
-
-              {/* User Avatar Menu */}
-              <UserAvatarMenu />
-            </>
-          ) : (
-            <>
-              <button
-                className="px-3 py-1.5 cursor-pointer bg-green-500/40 text-white font-medium hover:bg-green-500/60 transition-colors "
-                onClick={handleRoomCreations}
-              >
-                Rooms
-              </button>
-              <button
-                className="px-3 py-1.5 cursor-pointer text-gray-300 hover:text-white font-medium transition-colors"
-                onClick={handleStatsClick}
-              >
-                Stats
-              </button>
-              <button
-                className="px-3 py-1.5 cursor-pointer bg-gray-400/20 text-white font-medium hover:bg-gray-400/40 transition-colors "
-                onClick={() => signIn()}
-              >
-                Sign In
-              </button>
-            </>
-          )}
-        </div>
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div
+            ref={menuRef}
+            className={`md:hidden absolute top-full left-0 right-0 bg-neutral-900 border-x border-b border-krakedlight/50 mx-2 sm:mx-4 mt-1 backdrop-blur-3xl overflow-hidden transition-all duration-200 ease-out ${
+              isClosing
+                ? "opacity-0 -translate-y-2 max-h-0"
+                : "opacity-100 translate-y-0 max-h-screen"
+            }`}
+            style={{
+              animation: isClosing
+                ? "slideUp 200ms ease-out"
+                : "slideDown 200ms ease-out",
+            }}
+          >
+            <div className="flex flex-col p-4 space-y-3">
+              {session.data?.user ? (
+                <>
+                  <button
+                    className="w-full px-4 py-3 text-left bg-green-500/40 text-white font-medium hover:bg-green-500/60 transition-all rounded-sm active:scale-95"
+                    onClick={handleRoomCreations}
+                  >
+                    Rooms
+                  </button>
+                  <button
+                    className="w-full px-4 py-3 text-left text-gray-300 hover:text-white hover:bg-white/5 font-medium transition-all rounded-sm active:scale-95"
+                    onClick={handleStatsClick}
+                  >
+                    Stats
+                  </button>
+                  <div className="pt-3 border-t border-gray-700">
+                    <UserAvatarMenu />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="w-full px-4 py-3 text-left bg-green-500/40 text-white font-medium hover:bg-green-500/60 transition-all rounded-sm active:scale-95"
+                    onClick={handleRoomCreations}
+                  >
+                    Rooms
+                  </button>
+                  <button
+                    className="w-full px-4 py-3 text-left text-gray-300 hover:text-white hover:bg-white/5 font-medium transition-all rounded-sm active:scale-95"
+                    onClick={handleStatsClick}
+                  >
+                    Stats
+                  </button>
+                  <button
+                    className="w-full px-4 py-3 text-left bg-gray-400/20 text-white font-medium hover:bg-gray-400/40 transition-all rounded-sm active:scale-95"
+                    onClick={() => {
+                      signIn();
+                      handleCloseMenu();
+                    }}
+                  >
+                    Sign In
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+
+      {/* CSS Animations */}
+      <style jsx global>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-8px);
+            max-height: 0;
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 100vh;
+          }
+        }
+
+        @keyframes slideUp {
+          from {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 100vh;
+          }
+          to {
+            opacity: 0;
+            transform: translateY(-8px);
+            max-height: 0;
+          }
+        }
+      `}</style>
+    </>
   );
 }
