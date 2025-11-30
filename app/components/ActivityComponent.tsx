@@ -97,28 +97,28 @@ export default function ActivityHeatmap({
   });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
       {/* Activity Timeline */}
       <Card
         className="bg-krakedblue/30 border-none rounded-none 
-      shadow-lg"
+      shadow-lg overflow-hidden"
       >
         <CardHeader>
-          <CardTitle className="text-white font-semibold flex items-center gap-2">
+          <CardTitle className="text-white font-semibold flex items-center gap-2 text-base sm:text-lg">
             Activity Timeline
           </CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardDescription className="text-gray-400 text-sm">
             Detailed view of study activity
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="relative">
+        <CardContent className="overflow-x-auto">
+          <div className="relative min-w-[600px]">
             {/* Month labels */}
             <div className="flex mb-3 ml-12 gap-4">
               {monthMarkers.map((marker, idx) => (
                 <div
                   key={marker.month + idx}
-                  className="text-sm text-gray-400 font-medium"
+                  className="text-xs sm:text-sm text-gray-400 font-medium"
                 >
                   {marker.month}
                 </div>
@@ -127,7 +127,7 @@ export default function ActivityHeatmap({
 
             <div className="flex">
               {/* Day labels */}
-              <div className="flex flex-col gap-[6px] mr-3 text-xs text-gray-400">
+              <div className="flex flex-col gap-1.5 mr-3 text-xs text-gray-400">
                 {dayLabels.map((label) => (
                   <div key={label} className="h-7 leading-7 w-10 text-left">
                     {label}
@@ -136,9 +136,9 @@ export default function ActivityHeatmap({
               </div>
 
               {/* Heatmap grid */}
-              <div className="flex gap-[6px]">
+              <div className="flex gap-1.5">
                 {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-[6px]">
+                  <div key={weekIndex} className="flex flex-col gap-1.5">
                     {week.map((day, dayIndex) => {
                       if (!day.date) {
                         return (
@@ -175,10 +175,10 @@ export default function ActivityHeatmap({
             </div>
 
             {/* Legend */}
-            <div className="flex items-center gap-3 mt-6 text-sm text-gray-400">
-              <span>Less activity</span>
+            <div className="flex items-center gap-2 sm:gap-3 mt-6 text-xs sm:text-sm text-gray-400 flex-wrap">
+              <span className="whitespace-nowrap">Less activity</span>
 
-              <div className="flex gap-[6px]">
+              <div className="flex gap-1.5">
                 <div
                   className="w-5 h-5 rounded-md"
                   style={{ backgroundColor: "#0a1a2f" }} // 0 minutes (darkest)
@@ -205,7 +205,7 @@ export default function ActivityHeatmap({
                 />
               </div>
 
-              <span>More activity</span>
+              <span className="whitespace-nowrap">More activity</span>
             </div>
           </div>
 
@@ -238,7 +238,7 @@ export default function ActivityHeatmap({
       </Card>
 
       {/* Activity Insights */}
-      <Card className="bg-krakedblue/50  rounded-none border-none">
+      <Card className="bg-krakedblue/50 rounded-none border-none col-span-1 lg:col-span-2">
         <CardHeader>
           <CardTitle className="text-white font-semibold flex items-center gap-2">
             Activity Insights

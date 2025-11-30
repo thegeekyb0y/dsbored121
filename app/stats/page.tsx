@@ -113,7 +113,7 @@ export default function StatsPage() {
 
       {/* Main Content - Blurred if Guest */}
       <div
-        className={`max-w-7xl mx-auto px-12 py-12 transition-all duration-500 ${
+        className={`max-w-7xl mx-auto px-1 md:px-12 py-12 transition-all duration-500 ${
           isGuest ? "blur-md opacity-60 pointer-events-none select-none" : ""
         }`}
       >
@@ -127,7 +127,9 @@ export default function StatsPage() {
               >
                 <ArrowLeft className="w-6 h-6 text-white" />
               </button>
-              <h1 className="text-4xl font-bold">Your Study Stats</h1>
+              <div className="text-xl md:text-4xl font-normal md:font-bold">
+                Your Study Stats
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-krakedblue/20 shadow p-6 border border-white/5">

@@ -75,13 +75,11 @@ export default function RoomsListPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
-      {/* ... (Rest of the component remains the same, handling authenticated and empty states) ... */}
-
+    <div className="max-w-6xl mx-auto px-1 py-12">
       {/* Header with Create Button */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-5 md:mb-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2">My Study Rooms</h1>
+          <div className="text-md font-normal mb-1 md:mb-2">My Study Rooms</div>
           <p className="text-gray-400">
             {rooms.length === 0
               ? "You haven't joined any rooms yet"
@@ -93,10 +91,10 @@ export default function RoomsListPage() {
 
         <button
           onClick={() => router.push("/rooms/new")}
-          className="flex items-center gap-2 bg-krakedblue/30 hover:bg-krakedblue/70 text-white px-6 py-3 border border-gray-800 font-semibold transition-colors shadow-lg"
+          className="flex items-center gap-2 bg-krakedblue/30 hover:bg-krakedblue/70 text-white px-2 md:px-6 py-3 border border-gray-800 font-normal transition-colors shadow-lg"
         >
           <Plus className="w-5 h-5" />
-          Create Room
+          New Room
         </button>
       </div>
 
@@ -131,7 +129,7 @@ export default function RoomsListPage() {
         </div>
       ) : (
         /* Rooms Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {rooms.map((room) => (
             <Link
               key={room.code}
