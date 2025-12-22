@@ -112,7 +112,7 @@ export default function UnifiedTimer({
     }
     if (pomodoro.timeLeft === 0 && !completionCalledRef.current) {
       completionCalledRef.current = true;
-      onComplete(pomodoro.initialDuration);
+      handleStop();
     }
   }, [mode, pomodoro.timeLeft, pomodoro.initialDuration, onComplete]);
 

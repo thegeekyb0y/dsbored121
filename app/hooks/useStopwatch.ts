@@ -20,12 +20,22 @@ export default function useStopwatch(
   const startTimeRef = useRef<number>(0);
   const pausedTimeRef = useRef<number>(initialSeconds);
 
+  // --- FIX START: Sync internal state when initialSeconds changes (e.g. after restore) ---
   useEffect(() => {
+    setElapsedSeconds(initialSeconds);
+    pausedTimeRef.current = initialSeconds;
+  }, [initialSeconds]);
+  // --- FIX END ---
+
+  useEffect(() => {
+    // Set initial start time ref on mount
     startTimeRef.current = Date.now() - initialSeconds * 1000;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (isRunning) {
+      // When starting, calculate the "start time" by subtracting the accumulated elapsed time from "now"
       startTimeRef.current = Date.now() - pausedTimeRef.current * 1000;
 
       const interval = setInterval(() => {

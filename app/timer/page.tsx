@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ModeSelector from "../components/ModeSelector";
 import SubjectSelect from "../components/SubjectSelect";
 import UnifiedTimer from "../components/UnifiedTimer";
@@ -13,6 +13,33 @@ export default function TimerPage() {
   const [subject, setSubject] = useState("");
   const [timerActive, setTimerActive] = useState(false);
   const [showSubjectSelect, setShowSubjectSelect] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      const checkActiveSession = async () => {
+        try {
+          const response = await fetch("/api/sessions/active");
+          const data = await response.json();
+
+          if (data.activeSession) {
+            // There's an active session, restore the UI state
+            setSubject(data.activeSession.tag);
+            setTimerActive(true);
+            setShowSubjectSelect(false);
+          }
+        } catch (error) {
+          console.error("Failed to check active session:", error);
+        } finally {
+          setIsCheckingSession(false);
+        }
+      };
+
+      checkActiveSession();
+    } else if (status === "unauthenticated") {
+      setIsCheckingSession(false);
+    }
+  }, [status]);
 
   const handleStartClick = () => {
     setShowSubjectSelect(true);
@@ -53,6 +80,14 @@ export default function TimerPage() {
           subject="Guest Session"
           isGuest={true}
         />
+      </div>
+    );
+  }
+
+  if (isCheckingSession) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center gap-4 bg-krakedbg/10 py-6 md:py-10 border border-krakedlight/20 rounded-xl px-4 min-h-[400px]">
+        <div className="text-gray-400">Just a second...</div>
       </div>
     );
   }
