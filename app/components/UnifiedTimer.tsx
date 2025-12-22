@@ -105,6 +105,7 @@ export default function UnifiedTimer({
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [sessionActive, isGuest]);
 
+  // bugfix
   useEffect(() => {
     if (mode !== "pomodoro") return;
     if (pomodoro.timeLeft === pomodoro.initialDuration) {
