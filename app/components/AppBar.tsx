@@ -90,7 +90,7 @@ export function AppBar() {
         <div className="flex justify-between bg-neutral-900 border border-krakedlight/50 items-center mx-auto px-3 sm:px-4 py-2 backdrop-blur-3xl max-w-6xl">
           {/* Logo */}
           <Link
-            href="/"
+            href="/dashboard"
             className="flex items-center gap-2 p-1 sm:p-2 font-bold font-mono text-white hover:text-green-400 transition-colors"
           >
             <Image

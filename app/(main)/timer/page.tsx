@@ -2,9 +2,9 @@
 
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-import ModeSelector from "../components/ModeSelector";
-import SubjectSelect from "../components/SubjectSelect";
-import UnifiedTimer from "../components/UnifiedTimer";
+import ModeSelector from "../../components/ModeSelector";
+import SubjectSelect from "../../components/SubjectSelect";
+import UnifiedTimer from "../../components/UnifiedTimer";
 import { PlayIcon } from "lucide-react";
 
 export default function TimerPage() {

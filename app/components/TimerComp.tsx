@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useTimer } from "../hooks/useTimer";
+import { useTimer } from "../../hooks/useTimer";
 
 interface TimerCompProps {
   onComplete?: (seconds: number) => void;

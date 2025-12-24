@@ -1,7 +1,5 @@
 "use client";
 
-import LiveTimer from "@/app/components/LiveTimer";
-import { RoomDetailSkeleton } from "@/app/components/RoomsSkeleton";
 import { usePusher } from "@/app/hooks/usePusher";
 import { getAvatarById } from "@/lib/constants";
 import { useSession } from "next-auth/react";
@@ -9,6 +7,8 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import { ArrowLeft } from "lucide-react";
+import { RoomDetailSkeleton } from "@/app/components/RoomsSkeleton";
+import LiveTimer from "@/app/components/LiveTimer";
 
 interface Member {
   id: string;

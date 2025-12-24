@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Lexend_Deca } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./provider";
-import AppLayout from "./components/AppLayout";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -23,15 +22,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${Lexend.className} antialiased bg-black text-white max-w-7xl md:mx-auto md:px-4`}
-      >
+      <body className={`${Lexend.className} antialiased bg-black text-white`}>
         <Providers>
-          <AppLayout>
-            {children}
-            <Analytics />
-            <SpeedInsights />
-          </AppLayout>
+          {children}
+          <Analytics />
+          <SpeedInsights />
         </Providers>
       </body>
     </html>

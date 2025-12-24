@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import TimerPage from "./timer/page";
-import TodoList from "./components/TodoList";
-import WeeklyStatsWidget from "./components/WeeklyStatsWidget";
-import AuthGate from "./components/AuthGate";
+
+import TimerPage from "@/app/(main)/timer/page";
+import TodoList from "@/app/components/TodoList";
+import WeeklyStatsWidget from "@/app/components/WeeklyStatsWidget";
+import AuthGate from "@/app/components/AuthGate";
 
 export default function Home() {
   const [refreshStatsTrigger, setRefreshStatsTrigger] = useState(0);
@@ -16,7 +17,7 @@ export default function Home() {
       </section>
 
       <section className="relative max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:h-fit">
-        <div className="lg:col-span-2 h-full  min-h-fit max-h-[500px]">
+        <div className="lg:col-span-2 h-full min-h-fit max-h-[500px]">
           <AuthGate
             title="Unlock Tasks"
             description="Track your assignments and deadlines."
@@ -25,7 +26,7 @@ export default function Home() {
           </AuthGate>
         </div>
 
-        <div className="lg:col-span-1 min-h-fit max-h-[500px]  ">
+        <div className="lg:col-span-1 min-h-fit max-h-[500px]">
           <AuthGate
             title="Unlock Insights"
             description="See your weekly study progress visualized."

@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Users, Calendar, Plus, ArrowRight, LogIn } from "lucide-react"; // Added LogIn icon
+import { Users, Calendar, Plus, ArrowRight, LogIn } from "lucide-react";
 import { RoomsSkeleton } from "@/app/components/RoomsSkeleton";
 
 interface Room {
