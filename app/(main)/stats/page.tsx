@@ -4,9 +4,9 @@ import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import WeeklyChart from "../../components/WeeklyChart";
-import SubjectPieChart from "../../components/SubjectPie";
-import ActivityHeatmap from "../../components/ActivityComponent";
+import WeeklyChart from "@/app/components/WeeklyChart";
+import SubjectPieChart from "@/app/components/SubjectPie";
+import ActivityHeatmap from "@/app/components/ActivityComponent";
 import {
   Lock,
   LogIn,
