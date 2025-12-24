@@ -22,10 +22,13 @@ const featuresContent = [
       "Join or create virtual study sessions with friends. See who's actively studying, track collective focus time, and hold each other accountable in real-time.",
     content: (
       <div className="h-full w-full bg-linear-to-br from-krakedblue to-purple-900 flex items-center justify-center text-white rounded-md">
-        <div className="flex flex-col items-center gap-4 p-8 text-center">
-          <Users className="h-16 w-16 text-white/80" />
-          <p className="text-lg font-bold">Live Multiplayer Sessions</p>
-        </div>
+        <Image
+          src="/features/feature1.png"
+          width={400}
+          height={400}
+          className="h-full w-full object-cover opacity-90"
+          alt="Kraked Analytics Dashboard"
+        />
       </div>
     ),
   },
@@ -36,7 +39,7 @@ const featuresContent = [
     content: (
       <div className="h-full w-full flex items-center justify-center bg-black">
         <Image
-          src="/statspageimg.png"
+          src="/features/feature3.png"
           width={400}
           height={400}
           className="h-full w-full object-cover opacity-90"
@@ -52,7 +55,7 @@ const featuresContent = [
     content: (
       <div className="h-full w-full flex items-center justify-center bg-black">
         <Image
-          src="/statsfocus.jpg"
+          src="/features/feature4.png"
           width={400}
           height={400}
           className="h-full w-full object-cover opacity-80"
@@ -67,10 +70,13 @@ const featuresContent = [
       "Organize your study goals with built-in to-do lists. Break down large projects into manageable tasks and check them off as you make progress during focused sessions.",
     content: (
       <div className="h-full w-full bg-linear-to-br from-emerald-800 to-krakedgreen flex items-center justify-center text-white rounded-md">
-        <div className="flex flex-col items-center gap-4 p-8 text-center">
-          <CheckCircle2 className="h-16 w-16 text-emerald-200" />
-          <p className="text-lg font-bold">Integrated To-Do Lists</p>
-        </div>
+        <Image
+          src="/features/feature5.png"
+          width={400}
+          height={400}
+          className="h-full w-full object-cover opacity-90"
+          alt="Kraked Analytics Dashboard"
+        />
       </div>
     ),
   },
