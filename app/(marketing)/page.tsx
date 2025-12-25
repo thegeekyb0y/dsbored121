@@ -167,12 +167,52 @@ export default function LandingPage() {
 
         <StickyScroll content={featuresContent} />
       </section>
+      <div>
+        <div className="absolute w-full h-96 bg-krakedblue/20 blur-[100px] rounded-full pointer-events-none" />
+      </div>
+      <section
+        id="how-to-use"
+        className="w-full py-20 md:py-32 scroll-mt-28 bg-linear-to-b from-transparent via-krakedblue/10 to-transparent"
+      >
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              See Kraked in Action
+            </h2>
+            <p className="text-gray-400 max-w-2xl mx-auto text-base md:text-lg">
+              Watch this interactive demo to know about different features of
+              Kraked.
+            </p>
+          </div>
 
-      <section id="how-to-use" className="w-full py-20 md:py-32 scroll-mt-28">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2 className="text-3xl md:text-5xl font-bold mb-8 text-center">
-            How to Use
-          </h2>
+          {/* Supademo Embed Container */}
+          <div className="relative mx-auto max-w-5xl">
+            <div className="relative box-content w-full aspect-[1.96] rounded-xl overflow-hidden border-2 border-krakedlight/30 shadow-2xl">
+              <iframe
+                src="https://app.supademo.com/embed/cmjlfhd0f4plw3zz27vf827ia?embed_v=2"
+                loading="lazy"
+                title="Master Focused Study Sessions with Kraked"
+                allow="clipboard-write"
+                className="absolute top-0 left-0 w-full h-full"
+                style={{ border: "none" }}
+              />
+            </div>
+
+            {/* Decorative glowing orbs */}
+            <div className="absolute -top-4 -left-4 w-24 h-24 bg-krakedblue/50 rounded-full blur-2xl" />
+            <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-krakedgreen/50 rounded-full blur-2xl" />
+          </div>
+
+          {/* Call to action */}
+          <div className="text-center mt-12">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 bg-krakedgreen hover:bg-krakedgreen/80 text-white px-8 py-4 text-lg font-bold rounded-sm transition active:scale-95 shadow-lg"
+            >
+              Try It Yourself
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
       </section>
 
