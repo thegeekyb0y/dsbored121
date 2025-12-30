@@ -94,7 +94,7 @@ export default function RoomsListPage() {
           className="flex items-center gap-2 bg-krakedblue/30 hover:bg-krakedblue/70 text-white px-2 md:px-6 py-3 border border-gray-800 font-normal transition-colors shadow-lg"
         >
           <Plus className="w-5 h-5" />
-          New Room
+          <p className="text-sm md:text-lg">New Room</p>
         </button>
       </div>
 

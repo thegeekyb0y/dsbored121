@@ -117,10 +117,9 @@ export default function StatsPage() {
           isGuest ? "blur-md opacity-60 pointer-events-none select-none" : ""
         }`}
       >
-        {/* Top Section: Heading + Stats Cards + Image */}
-        <div className="flex gap-6 mb-12">
+        <div className="flex gap-6 mb-3 md:mb-12">
           <div className="flex-1">
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-4 md:mb-8">
               <button
                 onClick={() => router.back()}
                 className="p-2 hover:bg-white/10 rounded-full transition"
@@ -131,26 +130,26 @@ export default function StatsPage() {
                 Your Study Stats
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-krakedblue/20 shadow p-6 border border-white/5">
-                <h3 className="text-lg font-semibold mb-2 text-krakedlight">
+            <div className="grid grid-cols-2 gap-2 md:gap-6">
+              <div className="bg-krakedblue/20 shadow p-2 md:p-6 border border-white/5">
+                <h3 className="md:text-lg text-sm font-semibold mb-2 text-krakedlight">
                   Today
                 </h3>
-                <div className="text-4xl font-bold text-white mb-2">
+                <div className="md:text-4xl text-2xl font-bold text-white mb-2">
                   {stats.today.totalMinutes} min
                 </div>
-                <p className="text-krakedlight/80">
+                <p className="text-krakedlight/80 text-xs md:text-lg">
                   {stats.today.sessionCount} sessions
                 </p>
               </div>
-              <div className="bg-krakedblue/20 shadow p-6 border border-white/5">
-                <h3 className="text-lg font-semibold mb-2 text-krakedlight">
+              <div className="bg-krakedblue/20 shadow p-2 md:p-6 border border-white/5">
+                <h3 className="md:text-lg text-sm font-semibold mb-2 text-krakedlight">
                   This Week
                 </h3>
-                <div className="text-4xl font-bold text-white mb-2">
+                <div className="md:text-4xl text-2xl font-bold text-white mb-2">
                   {stats.week.totalMinutes} min
                 </div>
-                <p className="text-krakedlight/80">
+                <p className="text-krakedlight/80 text-xs md:text-lg ">
                   {stats.week.sessionCount} sessions
                 </p>
               </div>
@@ -167,8 +166,7 @@ export default function StatsPage() {
           </div>
         </div>
 
-        {/* Weekly Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-6 mb-6 md:mb-12">
           <WeeklyChart data={stats.dailyData || []} />
           <SubjectPieChart data={stats.bySubject} />
         </div>

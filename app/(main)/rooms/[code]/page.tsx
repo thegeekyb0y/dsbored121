@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Copy } from "lucide-react";
 import { RoomDetailSkeleton } from "@/app/components/RoomsSkeleton";
 import LiveTimer from "@/app/components/LiveTimer";
 
@@ -258,8 +258,8 @@ export default function RoomPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="bg-krakedblue/20 border border-krakedlight/30 shadow p-6 mb-6 ">
+    <div className="max-w-4xl mx-auto px md:px-4 py-12">
+      <div className="bg-krakedblue/20 border border-krakedlight/30 shadow p-2 md:p-6 mb-6 ">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-4 mb-2">
             <button
@@ -268,22 +268,25 @@ export default function RoomPage() {
             >
               <ArrowLeft className="w-6 h-6 text-white" />
             </button>
-            <h1 className="text-3xl font-bold">{roomData.room.name}</h1>
+            <h1 className="md:text-3xl text-lg font-bold">
+              {roomData.room.name}
+            </h1>
           </div>
-          <p className="text-krakedblue2 mb-4">
+          <p className="text-krakedblue2 md:block hidden p-2 mb-4">
             Room Code: {roomData.room.code}
           </p>
         </div>
 
-        <div className="mt-2">
-          <p className="text-sm text-krakedlight">
-            Share this code with others to invite them!
+        <div className="md:mt-2 px-2">
+          <p className="md:text-lg text-sm text-krakedlight">
+            Share this code to invite your friends!
           </p>
           <button
             onClick={handleCopy}
-            className="mt-2 bg-krakedblue px-4 py-2 rounded-xs text-white hover:bg-krakedblue/80 transition"
+            className="mt-2 flex items-center justify-center gap-2 bg-krakedblue px-4 py-2 rounded-xs text-white hover:bg-blue-600 transition-colors"
           >
-            Copy Room Code
+            <Copy className="h-4 w-4" />
+            <span>Copy Room Code</span>
           </button>
         </div>
       </div>
