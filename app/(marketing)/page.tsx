@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import {
-  ArrowRight,
-  BarChart2,
-  CheckCircle2,
-  Clock,
-  Users,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { LandingAppBar } from "../components/LandingAppBar";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";

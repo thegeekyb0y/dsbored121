@@ -4,11 +4,15 @@ interface LogData {
   level: LogLevel;
   message: string;
   timestamp: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 class Logger {
-  private log(level: LogLevel, message: string, context?: Record<string, any>) {
+  private log(
+    level: LogLevel,
+    message: string,
+    context?: Record<string, unknown>
+  ) {
     const logData: LogData = {
       level,
       message,
@@ -16,8 +20,6 @@ class Logger {
       context,
     };
 
-    // In production, you'd send this to a logging service
-    // For now, we'll use console with structured logging
     const logString = JSON.stringify(logData);
 
     switch (level) {
@@ -37,15 +39,15 @@ class Logger {
     }
   }
 
-  info(message: string, context?: Record<string, any>) {
+  info(message: string, context?: Record<string, unknown>) {
     this.log("info", message, context);
   }
 
-  warn(message: string, context?: Record<string, any>) {
+  warn(message: string, context?: Record<string, unknown>) {
     this.log("warn", message, context);
   }
 
-  error(message: string, error?: Error, context?: Record<string, any>) {
+  error(message: string, error?: Error, context?: Record<string, unknown>) {
     this.log("error", message, {
       ...context,
       error: error
@@ -58,11 +60,10 @@ class Logger {
     });
   }
 
-  debug(message: string, context?: Record<string, any>) {
+  debug(message: string, context?: Record<string, unknown>) {
     this.log("debug", message, context);
   }
 
-  // API request logging
   apiRequest(method: string, path: string, userId?: string) {
     this.info("API Request", {
       method,

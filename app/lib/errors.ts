@@ -1,4 +1,4 @@
-// lib/errors.ts
+// app/lib/errors.ts
 import { NextResponse } from "next/server";
 import { logger } from "./logger";
 import { Prisma } from "@prisma/client";
@@ -119,10 +119,14 @@ export function handleApiError(error: unknown): NextResponse {
 }
 
 // Wrapper for API route handlers
+// FIXED: Changed 'any' to 'Record<string, unknown>'
 export function withErrorHandler(
-  handler: (req: Request, context?: any) => Promise<NextResponse>
+  handler: (
+    req: Request,
+    context?: Record<string, unknown>
+  ) => Promise<NextResponse>
 ) {
-  return async (req: Request, context?: any) => {
+  return async (req: Request, context?: Record<string, unknown>) => {
     try {
       return await handler(req, context);
     } catch (error) {
@@ -144,18 +148,23 @@ type ValidationSchema<T> = {
   [K in keyof T]: ValidationRule;
 };
 
-// Validation helper
-export function validate<T extends Record<string, any>>(
-  data: any,
+export function validate<T extends Record<string, unknown>>(
+  data: unknown,
   schema: ValidationSchema<T>
 ): T {
   const errors: string[] = [];
+
+  if (typeof data !== "object" || data === null) {
+    throw new ValidationError("Invalid data: expected an object");
+  }
+
+  const dataObj = data as Record<string, unknown>;
 
   // Iterate over schema keys with proper typing
   for (const key in schema) {
     if (schema.hasOwnProperty(key)) {
       const rules = schema[key];
-      const value = data[key];
+      const value = dataObj[key];
 
       // Required check
       if (
@@ -203,5 +212,5 @@ export function validate<T extends Record<string, any>>(
     throw new ValidationError(errors.join(", "));
   }
 
-  return data as T;
+  return dataObj as T;
 }

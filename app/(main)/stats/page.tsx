@@ -7,13 +7,7 @@ import Image from "next/image";
 import WeeklyChart from "@/app/components/WeeklyChart";
 import SubjectPieChart from "@/app/components/SubjectPie";
 import ActivityHeatmap from "@/app/components/ActivityComponent";
-import {
-  Lock,
-  LogIn,
-  ArrowLeft,
-  SquaresIntersect,
-  LucideTextSearch,
-} from "lucide-react";
+import { LogIn, ArrowLeft, LucideTextSearch } from "lucide-react";
 import { DUMMY_STATS, StatsData } from "@/lib/dummystats";
 
 export default function StatsPage() {

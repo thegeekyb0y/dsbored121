@@ -3,14 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import useStopwatch from "@/app/hooks/useStopwatch";
 import { useTimer } from "@/app/hooks/useTimer";
-import {
-  PauseIcon,
-  PlayIcon,
-  RedoIcon,
-  SaveAllIcon,
-  Square,
-  SquareDashed,
-} from "lucide-react";
+import { PauseIcon, PlayIcon, RedoIcon, Square } from "lucide-react";
 
 interface UnifiedTimerProps {
   mode: "focus" | "pomodoro";

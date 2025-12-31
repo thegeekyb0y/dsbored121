@@ -19,7 +19,7 @@ export const cache = {
     }
   },
 
-  async set(key: string, value: any, ttl: number = 300): Promise<void> {
+  async set<T>(key: string, value: T, ttl: number = 300): Promise<void> {
     try {
       await redis.set(key, value, { ex: ttl });
     } catch (error) {
