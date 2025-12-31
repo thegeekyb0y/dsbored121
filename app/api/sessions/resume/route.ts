@@ -1,24 +1,48 @@
 import { authOptions } from "@/app/lib/auth";
+import { cache } from "@/app/lib/cache";
+import {
+  handleApiError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/app/lib/errors";
+import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
 import { pusherServer } from "@/app/lib/pusher";
+import {
+  createRateLimitResponse,
+  rateLimiters,
+  withRateLimit,
+} from "@/app/lib/rate-limit";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
-    const session = await getServerSession(authOptions);
+    const { success, headers, identifier } = await withRateLimit(
+      request,
+      rateLimiters.write
+    );
+    logger.apiRequest("POST", "/api/sessions/resume", identifier);
 
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorised" }, { status: 400 });
+    if (!success) {
+      return createRateLimitResponse(headers);
     }
+
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      throw new UnauthorizedError();
+    }
+
     const now = new Date();
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, name: true, image: true, email: true },
+      select: { id: true, name: true },
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw new NotFoundError("User");
     }
 
     const activeSession = await prisma.activeSession.findUnique({
@@ -27,16 +51,13 @@ export async function POST() {
       },
     });
     if (!activeSession) {
-      return NextResponse.json(
-        { error: "No active session found to stop" },
-        { status: 404 }
-      );
+      throw new NotFoundError("Active Session");
     }
 
-    if (!activeSession || !activeSession.isPaused || !activeSession.pausedAt) {
+    if (!activeSession.isPaused || !activeSession.pausedAt) {
       return NextResponse.json(
         { message: "Session is already running" },
-        { status: 200 }
+        { status: 200, headers }
       );
     }
 
@@ -54,6 +75,8 @@ export async function POST() {
       },
     });
 
+    await cache.del(`active-session:${session.user.email}`);
+
     const memberships = await prisma.roomMember.findMany({
       where: {
         userId: user.id,
@@ -67,24 +90,26 @@ export async function POST() {
         "session-resumed",
         {
           userId: user.id,
-          userName: user.name, // Added for consistency with pause/route.ts
+          userName: user.name,
           newStartedAt: updatedSession.startedAt,
         }
       );
     }
+
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse("POST", "/api/sessions/resume", 200, elapsed);
+
     return NextResponse.json(
       {
         message: "Session resumed successfully",
         newStartedAt: updatedSession.startedAt,
         pausedDurationMs: pausedDurationMs,
       },
-      { status: 200 }
+      { headers }
     );
   } catch (error) {
-    console.error("Resume Session Error:", error);
-    return NextResponse.json(
-      { error: "Failed to resume session" },
-      { status: 500 }
-    );
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse("POST", "/api/sessions/resume", 500, elapsed);
+    return handleApiError(error);
   }
 }

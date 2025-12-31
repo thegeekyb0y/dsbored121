@@ -162,6 +162,7 @@ export default function StatsPage() {
               width={400}
               height={400}
               className="rounded-lg grayscale opacity-80"
+              priority={true}
             />
           </div>
         </div>

@@ -1,15 +1,42 @@
 import { authOptions } from "@/app/lib/auth";
+import { cache, cacheKeys } from "@/app/lib/cache";
+import {
+  handleApiError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/app/lib/errors";
+import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
 import { pusherServer } from "@/app/lib/pusher";
+import {
+  createRateLimitResponse,
+  rateLimiters,
+  withRateLimit,
+} from "@/app/lib/rate-limit";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
-    const session = await getServerSession(authOptions);
+    const { success, headers, identifier } = await withRateLimit(
+      request,
+      rateLimiters.write
+    );
+    logger.apiRequest("POST", "/api/sessions/stop", identifier);
 
+    if (!success) {
+      logger.warn("Rate Limit Exceeded", {
+        endpoint: "/api/sessions/stop",
+        identifier,
+      });
+      return createRateLimitResponse(headers);
+    }
+
+    const session = await getServerSession(authOptions);
     if (!session?.user.email) {
-      return NextResponse.json({ error: "Unauthorised" }, { status: 400 });
+      throw new UnauthorizedError();
     }
 
     const user = await prisma.user.findUnique({
@@ -18,7 +45,7 @@ export async function POST() {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw new NotFoundError("User");
     }
 
     const activeSession = await prisma.activeSession.findUnique({
@@ -27,10 +54,7 @@ export async function POST() {
       },
     });
     if (!activeSession) {
-      return NextResponse.json(
-        { error: "No active session found to stop" },
-        { status: 404 }
-      );
+      throw new NotFoundError("Active Session");
     }
 
     const duration = Math.floor(
@@ -41,15 +65,19 @@ export async function POST() {
       await tx.activeSession.delete({
         where: { id: activeSession.id },
       });
-      const studySession = await tx.studySession.create({
+      return await tx.studySession.create({
         data: {
           userId: user.id,
           duration: duration,
           tag: activeSession.tag,
         },
       });
-      return studySession;
     });
+
+    await Promise.all([
+      cache.del(`active-session: ${session.user.email}`),
+      cache.del(cacheKeys.userStats(user.id)),
+    ]);
 
     const memberships = await prisma.roomMember.findMany({
       where: {
@@ -71,16 +99,20 @@ export async function POST() {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      studySession: result,
-      duration: duration,
-    });
-  } catch (error) {
-    console.error("Error stopping session:", error);
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse("POST", "/api/sessions/stop", 200, elapsed);
+
     return NextResponse.json(
-      { error: "Failed to stop session" },
-      { status: 500 }
+      {
+        success: true,
+        studySession: result,
+        duration: duration,
+      },
+      { headers }
     );
+  } catch (error) {
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse("POST", "/api/sessions/stop", 500, elapsed);
+    return handleApiError(error);
   }
 }

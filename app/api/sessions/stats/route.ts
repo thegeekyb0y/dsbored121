@@ -2,13 +2,36 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
 import { authOptions } from "@/app/lib/auth";
+import {
+  handleApiError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/app/lib/errors";
+import {
+  createRateLimitResponse,
+  rateLimiters,
+  withRateLimit,
+} from "@/app/lib/rate-limit";
+import { logger } from "@/app/lib/logger";
+import { cache, cacheKeys } from "@/app/lib/cache";
 
 export async function GET(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
+  const startTime = Date.now();
 
+  try {
+    const { success, headers, identifier } = await withRateLimit(
+      request,
+      rateLimiters.write
+    );
+    logger.apiRequest("GET", "/api/sessions/stats", identifier);
+
+    if (!success) {
+      return createRateLimitResponse(headers);
+    }
+
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new UnauthorizedError();
     }
 
     const user = await prisma.user.findUnique({
@@ -16,7 +39,18 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw new NotFoundError("User");
+    }
+
+    const cacheKey = cacheKeys.userStats(user.id);
+    const cachedStats = await cache.get(cacheKey);
+
+    if (cachedStats) {
+      const elapsed = Date.now() - startTime;
+      logger.apiResponse("GET", "/api/sessions/stats", 200, elapsed);
+      return NextResponse.json(cachedStats, {
+        headers: { ...headers, "X-Cache": "HIT" },
+      });
     }
 
     const today = new Date();
@@ -29,47 +63,34 @@ export async function GET(request: NextRequest) {
     monthAgo.setDate(monthAgo.getDate() - 30);
 
     // Today's stats
-    const todayStats = await prisma.studySession.aggregate({
-      where: {
-        userId: user.id,
-        createdAt: { gte: today },
-      },
-      _sum: { duration: true },
-      _count: true,
-    });
-
-    // This Week stats
-    const weekStats = await prisma.studySession.aggregate({
-      where: {
-        userId: user.id,
-        createdAt: { gte: weekAgo },
-      },
-      _sum: { duration: true },
-      _count: true,
-    });
-
-    // Week subject breakdown
-    const weekBySubject = await prisma.studySession.groupBy({
-      by: ["tag"],
-      where: {
-        userId: user.id,
-        createdAt: { gte: weekAgo },
-      },
-      _sum: { duration: true },
-      _count: true,
-    });
-
-    // Get daily data for the week line chart
-    const weekSessions = await prisma.studySession.findMany({
-      where: {
-        userId: user.id,
-        createdAt: { gte: weekAgo },
-      },
-      select: {
-        duration: true,
-        createdAt: true,
-      },
-    });
+    const [todayStats, weekStats, weekBySubject, weekSessions, monthSessions] =
+      await Promise.all([
+        prisma.studySession.aggregate({
+          where: { userId: user.id, createdAt: { gte: today } },
+          _sum: { duration: true },
+          _count: true,
+        }),
+        prisma.studySession.aggregate({
+          where: { userId: user.id, createdAt: { gte: weekAgo } },
+          _sum: { duration: true },
+          _count: true,
+        }),
+        prisma.studySession.groupBy({
+          by: ["tag"],
+          where: { userId: user.id, createdAt: { gte: weekAgo } },
+          _sum: { duration: true },
+          _count: true,
+        }),
+        prisma.studySession.findMany({
+          where: { userId: user.id, createdAt: { gte: weekAgo } },
+          select: { duration: true, createdAt: true },
+        }),
+        prisma.studySession.findMany({
+          where: { userId: user.id, createdAt: { gte: monthAgo } },
+          select: { duration: true, createdAt: true, tag: true },
+          orderBy: { createdAt: "asc" },
+        }),
+      ]);
 
     const dailyMap = new Map<string, number>();
     weekSessions.forEach((session) => {
@@ -90,22 +111,6 @@ export async function GET(request: NextRequest) {
         minutes: Math.floor((dailyMap.get(dateKey) || 0) / 60),
       });
     }
-
-    // Get month activity for heatmap
-    const monthSessions = await prisma.studySession.findMany({
-      where: {
-        userId: user.id,
-        createdAt: { gte: monthAgo },
-      },
-      select: {
-        duration: true,
-        createdAt: true,
-        tag: true,
-      },
-      orderBy: {
-        createdAt: "asc",
-      },
-    });
 
     const monthActivityMap = new Map<string, number>();
     const hourActivityMap = new Map<number, number>();
@@ -150,7 +155,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate insights
-    // Current streak
     let currentStreak = 0;
     for (let i = 0; i < 365; i++) {
       const date = new Date();
@@ -229,7 +233,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({
+    const statsData = {
       today: {
         totalMinutes: Math.floor((todayStats._sum.duration || 0) / 60),
         sessionCount: todayStats._count,
@@ -243,27 +247,32 @@ export async function GET(request: NextRequest) {
         minutes: Math.floor((item._sum.duration || 0) / 60),
         count: item._count,
       })),
-      dailyData: dailyData,
-      monthActivity: monthActivity,
+      dailyData,
+      monthActivity,
       insights: {
-        currentStreak: currentStreak,
-        longestStreak: longestStreak,
+        currentStreak,
+        longestStreak,
         longestStreakDate: longestStreakEnd
           ? new Date(longestStreakEnd).toLocaleDateString("en-US", {
               month: "long",
               day: "numeric",
             })
           : "",
-        mostActiveDay: mostActiveDay,
+        mostActiveDay,
         mostActiveTime: maxHourActivity > 0 ? formatHour(mostActiveHour) : "",
-        mostStudiedSubject: mostStudiedSubject,
+        mostStudiedSubject,
       },
+    };
+
+    await cache.set(cacheKey, statsData, 300);
+
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse("GET", "/api/sessions/stats", 200, elapsed);
+
+    return NextResponse.json(statsData, {
+      headers: { ...headers, "X-Cache": "MISS" },
     });
   } catch (error) {
-    console.error("Error fetching stats:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
