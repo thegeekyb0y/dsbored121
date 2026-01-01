@@ -3,12 +3,41 @@ import prisma from "@/app/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
+import { cache, cacheKeys } from "@/app/lib/cache";
+import { logger } from "@/app/lib/logger";
+import {
+  createRateLimitResponse,
+  rateLimiters,
+  withRateLimit,
+} from "@/app/lib/rate-limit";
+import {
+  handleApiError,
+  NotFoundError,
+  UnauthorizedError,
+  validate,
+} from "@/app/lib/errors";
 
+export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+
+  try {
+    const { success, headers, identifier } = await withRateLimit(
+      request,
+      rateLimiters.rooms
+    );
+    logger.apiRequest("POST", "/api/rooms/create", identifier);
+
+    if (!success) {
+      logger.warn("Rate limit exceeded", {
+        endpoint: "/api/rooms/create",
+        identifier,
+      });
+      return createRateLimitResponse(headers);
+    }
+
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new UnauthorizedError();
     }
 
     const user = await prisma.user.findUnique({
@@ -16,30 +45,21 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw new NotFoundError("User");
     }
 
     const data = await request.json();
-    const { roomName } = data;
-
-    if (!roomName) {
-      return NextResponse.json(
-        {
-          error: "Room Name is required",
-        },
-        {
-          status: 400,
-        },
-      );
-    }
+    const validatedData = validate<{ roomName: string }>(data, {
+      roomName: { type: "string", required: true, min: 1, max: 100 },
+    });
 
     function generateRoomCode() {
-      const variable = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-      let roomCode = "";
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+      let code = "";
       for (let i = 0; i < 6; i++) {
-        roomCode += variable[Math.floor(Math.random() * variable.length)];
+        code += chars[Math.floor(Math.random() * chars.length)];
       }
-      return roomCode;
+      return code;
     }
 
     let roomCode = generateRoomCode();
@@ -54,7 +74,7 @@ export async function POST(request: NextRequest) {
       const newRoom = await tx.room.create({
         data: {
           code: roomCode,
-          name: roomName,
+          name: validatedData.roomName,
           hostId: user.id,
         },
       });
@@ -69,16 +89,20 @@ export async function POST(request: NextRequest) {
       return newRoom;
     });
 
-    return NextResponse.json({
-      success: true,
-      roomCode: room.code,
-      roomId: room.id,
-    });
-  } catch (error) {
-    console.error("Error creating room:", error);
+    await cache.del(cacheKeys.userRooms(user.id));
+
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse("POST", "/api/rooms/create", 200, elapsed);
+
     return NextResponse.json(
-      { error: "Failed to create room" },
-      { status: 500 },
+      {
+        success: true,
+        roomCode: room.code,
+        roomId: room.id,
+      },
+      { headers }
     );
+  } catch (error) {
+    return handleApiError(error);
   }
 }

@@ -1,14 +1,35 @@
 import { authOptions } from "@/app/lib/auth";
+import { cache, cacheKeys } from "@/app/lib/cache";
+import {
+  handleApiError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/app/lib/errors";
+import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
+import {
+  createRateLimitResponse,
+  rateLimiters,
+  withRateLimit,
+} from "@/app/lib/rate-limit";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
-    const session = await getServerSession(authOptions);
+    const { success, headers, identifier } = await withRateLimit(
+      request,
+      rateLimiters.read
+    );
+    if (!success) {
+      return createRateLimitResponse(headers);
+    }
 
+    const session = await getServerSession(authOptions);
     if (!session?.user.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new UnauthorizedError();
     }
 
     const user = await prisma.user.findUnique({
@@ -17,7 +38,19 @@ export async function GET() {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw new NotFoundError("User");
+    }
+
+    const key = cacheKeys.userRooms(user.id);
+    const cached = await cache.get(key);
+
+    if (cached) {
+      const elapsed = Date.now() - startTime;
+      logger.apiResponse("GET", "/api/rooms/my-rooms", 200, elapsed);
+      return NextResponse.json(
+        { rooms: cached },
+        { headers: { ...headers, "X-Cache": "HIT" } }
+      );
     }
 
     const roomsJoined = await prisma.roomMember.findMany({
@@ -41,12 +74,16 @@ export async function GET() {
       joinedAt: member.joinedAt,
     }));
 
-    return NextResponse.json({ rooms }, { status: 200 });
-  } catch (error) {
-    console.error("Error fetching joined rooms: ", error);
+    await cache.set(key, rooms, 120);
+
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse("GET", "/api/rooms/my-rooms", 200, elapsed);
+
     return NextResponse.json(
-      { error: "Failed to fetch joined rooms" },
-      { status: 500 }
+      { rooms },
+      { headers: { ...headers, "X-Cache": "MISS" } }
     );
+  } catch (error) {
+    return handleApiError(error);
   }
 }

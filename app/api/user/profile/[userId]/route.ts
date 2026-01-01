@@ -1,22 +1,62 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
+import { cache, cacheKeys } from "@/app/lib/cache";
+import {
+  handleApiError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/app/lib/errors";
+import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
+import {
+  createRateLimitResponse,
+  rateLimiters,
+  withRateLimit,
+} from "@/app/lib/rate-limit";
+import { getServerSession } from "next-auth";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
   props: { params: Promise<{ userId: string }> }
 ) {
+  const startTime = Date.now();
+
   try {
     const params = await props.params;
-    const { userId } = params;
+    const { success, headers, identifier } = await withRateLimit(
+      request,
+      rateLimiters.read
+    );
+    logger.apiRequest("GET", `/api/user/profile/${params.userId}`, identifier);
+
+    if (!success) {
+      return createRateLimitResponse(headers);
+    }
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new UnauthorizedError();
     }
+
+    const cacheKey = cacheKeys.userProfile(params.userId);
+    const cached = await cache.get(cacheKey);
+
+    if (cached) {
+      const elapsed = Date.now() - startTime;
+      logger.apiResponse(
+        "GET",
+        `/api/user/profile/${params.userId}`,
+        200,
+        elapsed
+      );
+      return NextResponse.json(
+        { user: cached },
+        { headers: { ...headers, "X-Cache": "HIT" } }
+      );
+    }
+
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: params.userId },
       select: {
         name: true,
         bio: true,
@@ -29,20 +69,29 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw new NotFoundError("User");
     }
 
-    return NextResponse.json({
-      user: {
-        ...user,
-        email: userId === session.user.id ? user.email : null,
-      },
-    });
-  } catch (error) {
-    console.error("Profile fetch error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch profile" },
-      { status: 500 }
+    const userData = {
+      ...user,
+      email: params.userId === session.user.id ? user.email : null,
+    };
+
+    await cache.set(cacheKey, userData, 300);
+
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse(
+      "GET",
+      `/api/user/profile/${params.userId}`,
+      200,
+      elapsed
     );
+
+    return NextResponse.json(
+      { user: userData },
+      { headers: { ...headers, "X-Cache": "MISS" } }
+    );
+  } catch (error) {
+    return handleApiError(error);
   }
 }

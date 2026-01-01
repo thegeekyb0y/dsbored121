@@ -1,25 +1,57 @@
 import { authOptions } from "@/app/lib/auth";
+import { cache, cacheKeys } from "@/app/lib/cache";
+import {
+  handleApiError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/app/lib/errors";
+import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
+import {
+  createRateLimitResponse,
+  rateLimiters,
+  withRateLimit,
+} from "@/app/lib/rate-limit";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-
 export async function GET(
   request: NextRequest,
   props: { params: Promise<{ code: string }> }
 ) {
-  const params = await props.params;
-  const { code } = params;
-  try {
-    const session = await getServerSession(authOptions);
+  const startTime = Date.now();
 
+  try {
+    const params = await props.params;
+    const { code } = params;
+
+    const { success, headers, identifier } = await withRateLimit(
+      request,
+      rateLimiters.read
+    );
+    logger.apiRequest("GET", `/api/rooms/${code}`, identifier);
+
+    if (!success) {
+      return createRateLimitResponse(headers);
+    }
+
+    const session = await getServerSession(authOptions);
     if (!session?.user.email) {
-      return NextResponse.json({ error: "Unauthorised" }, { status: 400 });
+      throw new UnauthorizedError();
+    }
+
+    const cacheKey = cacheKeys.roomData(code);
+    const cached = await cache.get(cacheKey);
+
+    if (cached) {
+      const elapsed = Date.now() - startTime;
+      logger.apiResponse("GET", `/api/rooms/${code}`, 200, elapsed);
+      return NextResponse.json(cached, {
+        headers: { ...headers, "X-Cache": "HIT" },
+      });
     }
 
     const room = await prisma.room.findUnique({
-      where: {
-        code: code,
-      },
+      where: { code },
       include: {
         members: {
           include: {
@@ -38,10 +70,10 @@ export async function GET(
     });
 
     if (!room) {
-      return NextResponse.json({ error: "Room not found" }, { status: 404 });
+      throw new NotFoundError("Room");
     }
 
-    return NextResponse.json({
+    const roomData = {
       room: {
         id: room.code,
         code: room.code,
@@ -54,12 +86,17 @@ export async function GET(
         joinedAt: member.joinedAt,
         user: member.user,
       })),
+    };
+
+    await cache.set(cacheKey, roomData, 60);
+
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse("GET", `/api/rooms/${code}`, 200, elapsed);
+
+    return NextResponse.json(roomData, {
+      headers: { ...headers, "X-Cache": "MISS" },
     });
   } catch (error) {
-    console.error("Error fetching room: ", error);
-    return NextResponse.json(
-      { error: "Failed to fetch room" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

@@ -1,14 +1,36 @@
 import { authOptions } from "@/app/lib/auth";
+import {
+  handleApiError,
+  NotFoundError,
+  UnauthorizedError,
+  validate,
+} from "@/app/lib/errors";
+import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
+import {
+  createRateLimitResponse,
+  rateLimiters,
+  withRateLimit,
+} from "@/app/lib/rate-limit";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+export async function GET(request: NextRequest) {
+  const startTime = Date.now();
 
-export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const { success, headers, identifier } = await withRateLimit(
+      request,
+      rateLimiters.read
+    );
+    logger.apiRequest("GET", "/api/user/subjects", identifier);
 
+    if (!success) {
+      return createRateLimitResponse(headers);
+    }
+
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new UnauthorizedError();
     }
 
     const user = await prisma.user.findUnique({
@@ -16,117 +38,118 @@ export async function GET() {
       select: { customSubjects: true },
     });
 
-    return NextResponse.json({
-      customSubjects: user?.customSubjects || [],
-    });
-  } catch (err) {
-    console.error("Error fetching custom subjects:", err);
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse("GET", "/api/user/subjects", 200, elapsed);
+
     return NextResponse.json(
-      { error: "Failed to fetch custom subjects" },
-      { status: 500 }
+      { customSubjects: user?.customSubjects || [] },
+      { headers }
     );
+  } catch (error) {
+    return handleApiError(error);
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
+    const { success, headers, identifier } = await withRateLimit(
+      request,
+      rateLimiters.write
+    );
+    logger.apiRequest("POST", "/api/user/subjects", identifier);
+
+    if (!success) {
+      return createRateLimitResponse(headers);
+    }
+
     const session = await getServerSession(authOptions);
-
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new UnauthorizedError();
     }
 
-    const { subject } = await req.json();
+    const body = await request.json();
+    const validated = validate<{ subject: string }>(body, {
+      subject: { type: "string", required: true, min: 1, max: 50 },
+    });
 
-    if (
-      !subject ||
-      typeof subject !== "string" ||
-      subject.trim().length === 0
-    ) {
-      return NextResponse.json(
-        { error: "Subject name is required" },
-        { status: 400 }
-      );
-    }
+    const trimmed = validated.subject.trim();
 
-    const trimmedSubject = subject.trim();
-
-    if (trimmedSubject.length > 50) {
-      return NextResponse.json(
-        { error: "Subject name too long (max 50 characters)" },
-        { status: 400 }
-      );
-    }
-
-    // Get current user
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { customSubjects: true },
     });
 
-    // Check if subject already exists
-    if (user?.customSubjects.includes(trimmedSubject)) {
+    if (user?.customSubjects.includes(trimmed)) {
       return NextResponse.json(
         { error: "Subject already exists" },
-        { status: 400 }
+        { status: 400, headers }
       );
     }
 
-    // Add subject to user's custom list
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
       data: {
         customSubjects: {
-          push: trimmedSubject,
+          push: trimmed,
         },
       },
       select: { customSubjects: true },
     });
 
-    return NextResponse.json({
-      success: true,
-      customSubjects: updatedUser.customSubjects,
-    });
-  } catch (err) {
-    console.error("Error adding custom subject:", err);
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse("POST", "/api/user/subjects", 200, elapsed);
+
     return NextResponse.json(
-      { error: "Failed to add custom subject" },
-      { status: 500 }
+      {
+        success: true,
+        customSubjects: updatedUser.customSubjects,
+      },
+      { headers }
     );
+  } catch (error) {
+    return handleApiError(error);
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(request: NextRequest) {
+  const startTime = Date.now();
+
   try {
+    const { success, headers, identifier } = await withRateLimit(
+      request,
+      rateLimiters.write
+    );
+    logger.apiRequest("DELETE", "/api/user/subjects", identifier);
+
+    if (!success) {
+      return createRateLimitResponse(headers);
+    }
+
     const session = await getServerSession(authOptions);
-
     if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new UnauthorizedError();
     }
 
-    const { subject } = await req.json();
+    const body = await request.json();
+    const validated = validate<{ subject: string }>(body, {
+      subject: { type: "string", required: true },
+    });
 
-    if (!subject) {
-      return NextResponse.json(
-        { error: "Subject name is required" },
-        { status: 400 }
-      );
-    }
-
-    // Get current subjects
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { customSubjects: true },
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      throw new NotFoundError("User");
     }
 
-    // Remove subject from array
-    const updatedSubjects = user.customSubjects.filter((s) => s !== subject);
+    const updatedSubjects = user.customSubjects.filter(
+      (s) => s !== validated.subject
+    );
 
-    // Update user
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
       data: {
@@ -135,15 +158,17 @@ export async function DELETE(req: Request) {
       select: { customSubjects: true },
     });
 
-    return NextResponse.json({
-      success: true,
-      customSubjects: updatedUser.customSubjects,
-    });
-  } catch (err) {
-    console.error("Error deleting custom subject:", err);
+    const elapsed = Date.now() - startTime;
+    logger.apiResponse("DELETE", "/api/user/subjects", 200, elapsed);
+
     return NextResponse.json(
-      { error: "Failed to delete custom subject" },
-      { status: 500 }
+      {
+        success: true,
+        customSubjects: updatedUser.customSubjects,
+      },
+      { headers }
     );
+  } catch (error) {
+    return handleApiError(error);
   }
 }
