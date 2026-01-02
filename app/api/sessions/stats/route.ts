@@ -62,7 +62,6 @@ export async function GET(request: NextRequest) {
     const monthAgo = new Date();
     monthAgo.setDate(monthAgo.getDate() - 30);
 
-    // Today's stats
     const [todayStats, weekStats, weekBySubject, weekSessions, monthSessions] =
       await Promise.all([
         prisma.studySession.aggregate({
@@ -70,6 +69,7 @@ export async function GET(request: NextRequest) {
           _sum: { duration: true },
           _count: true,
         }),
+
         prisma.studySession.aggregate({
           where: { userId: user.id, createdAt: { gte: weekAgo } },
           _sum: { duration: true },
@@ -80,11 +80,18 @@ export async function GET(request: NextRequest) {
           where: { userId: user.id, createdAt: { gte: weekAgo } },
           _sum: { duration: true },
           _count: true,
+          orderBy: {
+            _sum: {
+              duration: "desc",
+            },
+          },
         }),
+
         prisma.studySession.findMany({
           where: { userId: user.id, createdAt: { gte: weekAgo } },
           select: { duration: true, createdAt: true },
         }),
+
         prisma.studySession.findMany({
           where: { userId: user.id, createdAt: { gte: monthAgo } },
           select: { duration: true, createdAt: true, tag: true },
@@ -112,6 +119,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Build month activity map (last 30 days)
     const monthActivityMap = new Map<string, number>();
     const hourActivityMap = new Map<number, number>();
     const dayActivityMap = new Map<string, number>();
@@ -160,7 +168,7 @@ export async function GET(request: NextRequest) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateKey = date.toISOString().split("T")[0];
-      if (monthActivityMap.get(dateKey) || 0 > 0) {
+      if ((monthActivityMap.get(dateKey) || 0) > 0) {
         currentStreak++;
       } else {
         break;
@@ -178,7 +186,7 @@ export async function GET(request: NextRequest) {
       date.setDate(date.getDate() - i);
       const dateKey = date.toISOString().split("T")[0];
 
-      if (monthActivityMap.get(dateKey) || 0 > 0) {
+      if ((monthActivityMap.get(dateKey) || 0) > 0) {
         tempStreak++;
         tempStreakEnd = dateKey;
       } else {

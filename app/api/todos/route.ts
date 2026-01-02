@@ -15,6 +15,7 @@ import {
 } from "@/app/lib/rate-limit";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
@@ -48,7 +49,12 @@ export async function GET(request: NextRequest) {
 
     const todos = await prisma.todo.findMany({
       where: { user: { email: session.user.email } },
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { completed: "asc" },
+        { dueDate: "asc" },
+        { priority: "desc" },
+        { createdAt: "desc" },
+      ],
     });
 
     await cache.set(cacheKey, todos, 30);
