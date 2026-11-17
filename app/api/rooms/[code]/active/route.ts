@@ -1,5 +1,5 @@
 import { authOptions } from "@/app/lib/auth";
-import { cache } from "@/app/lib/cache";
+import { cache, cacheKeys } from "@/app/lib/cache";
 import { handleApiError, UnauthorizedError } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
@@ -39,7 +39,7 @@ export async function GET(
 
     const { roomId } = await requireRoomMember(session.user.email, code);
 
-    const cacheKey = `room-active:${code}`;
+    const cacheKey = cacheKeys.roomActive(code);
     const cached = await cache.get(cacheKey);
 
     if (cached) {
