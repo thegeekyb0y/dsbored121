@@ -49,9 +49,11 @@ export const cache = {
 };
 
 export const cacheKeys = {
-  userProfile: (userId: string) => `profile:${userId}`,
+  userProfile: (userId: string) => `profile:public:v2:${userId}`,
+  userProfileSelf: (userId: string) => `profile:self:v2:${userId}`,
   userStats: (userId: string) => `stats:${userId}`,
-  roomData: (roomCode: string) => `room:${roomCode}`,
+  roomData: (roomCode: string) => `room:v2:${roomCode}`,
+  roomActive: (roomCode: string) => `room-active:v2:${roomCode}`,
   userRooms: (userId: string) => `rooms:user:${userId}`,
   todos: (userId: string) => `todos:${userId}`,
 };

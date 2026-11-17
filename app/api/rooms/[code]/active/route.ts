@@ -1,12 +1,9 @@
 import { authOptions } from "@/app/lib/auth";
-import { cache } from "@/app/lib/cache";
-import {
-  handleApiError,
-  NotFoundError,
-  UnauthorizedError,
-} from "@/app/lib/errors";
+import { cache, cacheKeys } from "@/app/lib/cache";
+import { handleApiError, UnauthorizedError } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
+import { requireRoomMember } from "@/app/lib/room-access";
 import {
   createRateLimitResponse,
   rateLimiters,
@@ -40,7 +37,9 @@ export async function GET(
       throw new UnauthorizedError();
     }
 
-    const cacheKey = `room-active:${code}`;
+    const { roomId } = await requireRoomMember(session.user.email, code);
+
+    const cacheKey = cacheKeys.roomActive(code);
     const cached = await cache.get(cacheKey);
 
     if (cached) {
@@ -54,16 +53,8 @@ export async function GET(
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const room = await prisma.room.findUnique({
-      where: { code },
-    });
-
-    if (!room) {
-      throw new NotFoundError("Room");
-    }
-
     const members = await prisma.roomMember.findMany({
-      where: { roomId: room.id },
+      where: { roomId },
       select: { userId: true },
     });
 
