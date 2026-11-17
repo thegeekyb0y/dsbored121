@@ -1,14 +1,9 @@
 import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { redis } from "@/lib/redis";
 import { authOptions } from "./auth";
 import { error } from "console";
-
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
 
 export const rateLimiters = {
   auth: new Ratelimit({
