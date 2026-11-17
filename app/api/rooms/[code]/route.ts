@@ -7,6 +7,7 @@ import {
 } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
+import { requireRoomMember } from "@/app/lib/room-access";
 import {
   createRateLimitResponse,
   rateLimiters,
@@ -39,6 +40,8 @@ export async function GET(
       throw new UnauthorizedError();
     }
 
+    const { roomId } = await requireRoomMember(session.user.email, code);
+
     const cacheKey = cacheKeys.roomData(code);
     const cached = await cache.get(cacheKey);
 
@@ -51,7 +54,7 @@ export async function GET(
     }
 
     const room = await prisma.room.findUnique({
-      where: { code },
+      where: { id: roomId },
       include: {
         members: {
           include: {
