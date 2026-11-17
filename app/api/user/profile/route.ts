@@ -1,5 +1,5 @@
 import { authOptions } from "@/app/lib/auth";
-import { cache } from "@/app/lib/cache";
+import { cache, cacheKeys } from "@/app/lib/cache";
 import { handleApiError, UnauthorizedError, validate } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       throw new UnauthorizedError();
     }
 
-    const cacheKey = `profile:${session.user.email}`;
+    const cacheKey = cacheKeys.userProfileSelf(session.user.id);
     const cached = await cache.get(cacheKey);
 
     if (cached) {
@@ -108,9 +108,18 @@ export async function PATCH(request: NextRequest) {
           avatarId: validated.avatarId,
         }),
       },
+      select: {
+        name: true,
+        bio: true,
+        status: true,
+        avatarId: true,
+      },
     });
 
-    await cache.del(`profile:${session.user.email}`);
+    await Promise.all([
+      cache.del(cacheKeys.userProfileSelf(session.user.id)),
+      cache.del(cacheKeys.userProfile(session.user.id)),
+    ]);
 
     const elapsed = Date.now() - startTime;
     logger.apiResponse("PATCH", "/api/user/profile", 200, elapsed);

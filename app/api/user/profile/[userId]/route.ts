@@ -39,7 +39,14 @@ export async function GET(
     }
 
     const cacheKey = cacheKeys.userProfile(params.userId);
-    const cached = await cache.get(cacheKey);
+    const cached = await cache.get<{
+      name: string | null;
+      bio: string | null;
+      status: string | null;
+      avatarId: string | null;
+      image: string | null;
+      createdAt: Date;
+    }>(cacheKey);
 
     if (cached) {
       const elapsed = Date.now() - startTime;
@@ -50,7 +57,13 @@ export async function GET(
         elapsed
       );
       return NextResponse.json(
-        { user: cached },
+        {
+          user: {
+            ...cached,
+            email:
+              params.userId === session.user.id ? session.user.email : null,
+          },
+        },
         { headers: { ...headers, "X-Cache": "HIT" } }
       );
     }
@@ -63,7 +76,6 @@ export async function GET(
         status: true,
         avatarId: true,
         image: true,
-        email: true,
         createdAt: true,
       },
     });
@@ -72,12 +84,12 @@ export async function GET(
       throw new NotFoundError("User");
     }
 
+    await cache.set(cacheKey, user, 300);
+
     const userData = {
       ...user,
-      email: params.userId === session.user.id ? user.email : null,
+      email: params.userId === session.user.id ? session.user.email : null,
     };
-
-    await cache.set(cacheKey, userData, 300);
 
     const elapsed = Date.now() - startTime;
     logger.apiResponse(
