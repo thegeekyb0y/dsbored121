@@ -40,6 +40,13 @@ export const rateLimiters = {
     analytics: true,
     prefix: "@upstash/ratelimit/rooms",
   }),
+
+  pusherAuth: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(30, "1 m"),
+    analytics: true,
+    prefix: "@upstash/ratelimit/pusher-auth",
+  }),
 };
 
 export async function getClientIdentifier(

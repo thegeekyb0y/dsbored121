@@ -8,6 +8,7 @@ import {
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
 import { pusherServer } from "@/app/lib/pusher";
+import { roomChannel } from "@/app/lib/pusher-channels";
 import {
   createRateLimitResponse,
   rateLimiters,
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     for (const member of memberships) {
       await pusherServer.trigger(
-        `room-${member.room.code}`,
+        roomChannel(member.room.code),
         "session-resumed",
         {
           userId: user.id,

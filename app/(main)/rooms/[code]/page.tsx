@@ -2,6 +2,7 @@
 
 import { usePusher } from "@/app/hooks/usePusher";
 import { getAvatarById } from "@/lib/constants";
+import { roomChannel } from "@/app/lib/pusher-channels";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
@@ -79,7 +80,7 @@ export default function RoomPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const code = params.code as string;
-  const { channel } = usePusher(`room-${code}`);
+  const { channel } = usePusher(roomChannel(code));
 
   const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [loading, setLoading] = useState(true);
