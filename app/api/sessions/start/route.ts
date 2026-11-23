@@ -1,5 +1,5 @@
 import { authOptions } from "@/app/lib/auth";
-import { cache } from "@/app/lib/cache";
+import { cache, cacheKeys } from "@/app/lib/cache";
 import {
   handleApiError,
   NotFoundError,
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    await cache.del(`active-session: ${session.user.email}`);
+    await cache.del(cacheKeys.activeSession(session.user.email));
 
     const memberships = await prisma.roomMember.findMany({
       where: { userId: user.id },

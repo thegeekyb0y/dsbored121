@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     });
 
     await Promise.all([
-      cache.del(`active-session: ${session.user.email}`),
+      cache.del(cacheKeys.activeSession(session.user.email)),
       cache.del(cacheKeys.userStats(user.id)),
     ]);
 

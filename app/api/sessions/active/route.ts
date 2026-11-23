@@ -1,5 +1,5 @@
 import { authOptions } from "@/app/lib/auth";
-import { cache } from "@/app/lib/cache";
+import { cache, cacheKeys } from "@/app/lib/cache";
 import {
   handleApiError,
   NotFoundError,
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       throw new UnauthorizedError();
     }
 
-    const cacheKey = `active-session:${session.user.email}`;
+    const cacheKey = cacheKeys.activeSession(session.user.email);
     const cachedSession = await cache.get(cacheKey);
 
     if (cachedSession) {
