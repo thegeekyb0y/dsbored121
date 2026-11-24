@@ -1,6 +1,6 @@
 import { authOptions } from "@/app/lib/auth";
 import { cache, cacheKeys } from "@/app/lib/cache";
-import { handleApiError, UnauthorizedError } from "@/app/lib/errors";
+import { handleApiError, UnauthorizedError, ValidationError, validateStrict } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
 import {
@@ -35,7 +35,21 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { title, completed, priority, dueDate } = body;
+    const validated = validateStrict<{
+      title?: string;
+      completed?: boolean;
+      priority?: string;
+      dueDate?: Date | null;
+    }>(body, {
+      title: { type: "string", min: 1, max: 500 },
+      completed: { type: "boolean" },
+      priority: { type: "string", values: ["low", "medium", "high"] },
+      dueDate: { type: "date", nullable: true },
+    });
+
+    if (Object.keys(validated).length === 0) {
+      throw new ValidationError("No fields to update");
+    }
 
     const updated = await prisma.todo.updateMany({
       where: {
@@ -43,11 +57,15 @@ export async function PATCH(
         user: { email: session.user.email },
       },
       data: {
-        ...(title !== undefined && { title }),
-        ...(completed !== undefined && { completed }),
-        ...(priority !== undefined && { priority }),
-        ...(dueDate !== undefined && {
-          dueDate: dueDate ? new Date(dueDate) : null,
+        ...(validated.title !== undefined && { title: validated.title }),
+        ...(validated.completed !== undefined && {
+          completed: validated.completed,
+        }),
+        ...(validated.priority !== undefined && {
+          priority: validated.priority,
+        }),
+        ...(validated.dueDate !== undefined && {
+          dueDate: validated.dueDate,
         }),
       },
     });

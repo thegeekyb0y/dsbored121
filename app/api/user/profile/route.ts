@@ -1,10 +1,11 @@
 import { authOptions } from "@/app/lib/auth";
 import { cache, cacheKeys } from "@/app/lib/cache";
-import { handleApiError, UnauthorizedError, validate } from "@/app/lib/errors";
+import { handleApiError, UnauthorizedError, validateStrict } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
 import {
   createRateLimitResponse,
+  createUnavailableResponse,
   rateLimiters,
   withRateLimit,
 } from "@/app/lib/rate-limit";
@@ -70,11 +71,16 @@ export async function PATCH(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const { success, headers, identifier } = await withRateLimit(
+    const { success, unavailable, headers, identifier } = await withRateLimit(
       request,
-      rateLimiters.write
+      rateLimiters.write,
+      { failClosed: true }
     );
     logger.apiRequest("PATCH", "/api/user/profile", identifier);
+
+    if (unavailable) {
+      return createUnavailableResponse(headers);
+    }
 
     if (!success) {
       return createRateLimitResponse(headers);
@@ -86,7 +92,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validated = validate<{
+    const validated = validateStrict<{
       name?: string;
       bio?: string;
       status?: string;

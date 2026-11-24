@@ -3,7 +3,7 @@ import {
   handleApiError,
   NotFoundError,
   UnauthorizedError,
-  validate,
+  validateStrict,
 } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validated = validate<{ subject: string }>(body, {
+    const validated = validateStrict<{ subject: string }>(body, {
       subject: { type: "string", required: true, min: 1, max: 50 },
     });
 
@@ -133,8 +133,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validated = validate<{ subject: string }>(body, {
-      subject: { type: "string", required: true },
+    const validated = validateStrict<{ subject: string }>(body, {
+      subject: { type: "string", required: true, min: 1, max: 50 },
     });
 
     const user = await prisma.user.findUnique({

@@ -4,7 +4,7 @@ import {
   handleApiError,
   NotFoundError,
   UnauthorizedError,
-  validate,
+  validateStrict,
 } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
@@ -91,14 +91,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validated = validate<{
+    const validated = validateStrict<{
       title: string;
       priority?: string;
-      dueDate?: string;
+      dueDate?: Date | null;
     }>(body, {
       title: { type: "string", required: true, min: 1, max: 500 },
-      priority: { type: "string", required: false },
-      dueDate: { type: "string", required: false },
+      priority: { type: "string", values: ["low", "medium", "high"] },
+      dueDate: { type: "date", nullable: true },
     });
 
     const user = await prisma.user.findUnique({
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         title: validated.title,
         priority: validated.priority || "medium",
-        dueDate: validated.dueDate ? new Date(validated.dueDate) : null,
+        dueDate: validated.dueDate ?? null,
       },
     });
 

@@ -30,17 +30,6 @@ export const cache = {
       console.error("Cache del error:", error);
     }
   },
-
-  async invalidatePattern(pattern: string): Promise<void> {
-    try {
-      const keys = await redis.keys(pattern);
-      if (keys.length > 0) {
-        await redis.del(...keys);
-      }
-    } catch (error) {
-      console.error("Cache invalidate error:", error);
-    }
-  },
 };
 
 export const cacheKeys = {

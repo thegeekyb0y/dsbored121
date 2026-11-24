@@ -7,6 +7,7 @@ import { cache, cacheKeys } from "@/app/lib/cache";
 import { logger } from "@/app/lib/logger";
 import {
   createRateLimitResponse,
+  createUnavailableResponse,
   rateLimiters,
   withRateLimit,
 } from "@/app/lib/rate-limit";
@@ -14,7 +15,7 @@ import {
   handleApiError,
   NotFoundError,
   UnauthorizedError,
-  validate,
+  validateStrict,
 } from "@/app/lib/errors";
 import { generateRoomCode } from "@/app/lib/room-code";
 
@@ -22,11 +23,16 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const { success, headers, identifier } = await withRateLimit(
+    const { success, unavailable, headers, identifier } = await withRateLimit(
       request,
-      rateLimiters.rooms
+      rateLimiters.rooms,
+      { failClosed: true }
     );
     logger.apiRequest("POST", "/api/rooms/create", identifier);
+
+    if (unavailable) {
+      return createUnavailableResponse(headers);
+    }
 
     if (!success) {
       logger.warn("Rate limit exceeded", {
@@ -50,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    const validatedData = validate<{ roomName: string }>(data, {
+    const validatedData = validateStrict<{ roomName: string }>(data, {
       roomName: { type: "string", required: true, min: 1, max: 100 },
     });
 

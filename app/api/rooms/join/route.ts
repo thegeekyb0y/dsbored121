@@ -5,12 +5,14 @@ import {
   NotFoundError,
   UnauthorizedError,
   ValidationError,
-  validate,
+  validateStrict,
 } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
 import {
   createRateLimitResponse,
+  createUnavailableResponse,
+  getClientIp,
   rateLimiters,
   withRateLimit,
 } from "@/app/lib/rate-limit";
@@ -22,14 +24,17 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const { success, headers, identifier } = await withRateLimit(
-      request,
-      rateLimiters.rooms
-    );
-    logger.apiRequest("POST", "/api/rooms/join", identifier);
+    const ipOutcome = await withRateLimit(request, rateLimiters.joinIp, {
+      failClosed: true,
+      identifier: `ip:${getClientIp(request)}`,
+    });
+    logger.apiRequest("POST", "/api/rooms/join", ipOutcome.identifier);
 
-    if (!success) {
-      return createRateLimitResponse(headers);
+    if (ipOutcome.unavailable) {
+      return createUnavailableResponse(ipOutcome.headers);
+    }
+    if (!ipOutcome.success) {
+      return createRateLimitResponse(ipOutcome.headers);
     }
 
     const session = await getServerSession(authOptions);
@@ -37,9 +42,21 @@ export async function POST(request: NextRequest) {
       throw new UnauthorizedError();
     }
 
+    const userOutcome = await withRateLimit(request, rateLimiters.joinUser, {
+      failClosed: true,
+      identifier: `user:${session.user.id}`,
+    });
+    if (userOutcome.unavailable) {
+      return createUnavailableResponse(userOutcome.headers);
+    }
+    if (!userOutcome.success) {
+      return createRateLimitResponse(userOutcome.headers);
+    }
+    const headers = userOutcome.headers;
+
     const body = await request.json();
-    const parsed = validate<{ roomCode: string }>(body, {
-      roomCode: { type: "string", required: true, min: 1 },
+    const parsed = validateStrict<{ roomCode: string }>(body, {
+      roomCode: { type: "string", required: true, min: 1, max: 12 },
     });
 
     const roomCode = normalizeRoomCode(parsed.roomCode);
