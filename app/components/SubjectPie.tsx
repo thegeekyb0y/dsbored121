@@ -116,10 +116,7 @@ export default function SubjectPieChart({ data }: SubjectPieChartProps) {
               innerRadius={60}
               outerRadius={100}
               paddingAngle={2}
-              label={({ subject, minutes }) => {
-                const percentage = ((minutes / totalMinutes) * 100).toFixed(0);
-                return `${percentage}%`;
-              }}
+              label={({ percent }) => `${Math.round((percent ?? 0) * 100)}%`}
               labelLine={false}
             >
               {chartData.map((entry, index) => (
