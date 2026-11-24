@@ -1,6 +1,6 @@
 import { authOptions } from "@/app/lib/auth";
 import { cache, cacheKeys } from "@/app/lib/cache";
-import { handleApiError, UnauthorizedError, validate } from "@/app/lib/errors";
+import { handleApiError, UnauthorizedError, validateStrict } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
 import {
@@ -92,7 +92,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validated = validate<{
+    const validated = validateStrict<{
       name?: string;
       bio?: string;
       status?: string;
