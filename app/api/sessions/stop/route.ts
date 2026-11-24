@@ -8,6 +8,7 @@ import {
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
 import { pusherServer } from "@/app/lib/pusher";
+import { roomChannel } from "@/app/lib/pusher-channels";
 import {
   createRateLimitResponse,
   rateLimiters,
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, name: true, image: true, email: true },
+      select: { id: true, name: true, image: true },
     });
 
     if (!user) {
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
     });
 
     await Promise.all([
-      cache.del(`active-session: ${session.user.email}`),
+      cache.del(cacheKeys.activeSession(session.user.email)),
       cache.del(cacheKeys.userStats(user.id)),
     ]);
 
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     for (const member of memberships) {
       await pusherServer.trigger(
-        `room-${member.room.code}`,
+        roomChannel(member.room.code),
         "session-stopped",
         {
           userId: user.id,

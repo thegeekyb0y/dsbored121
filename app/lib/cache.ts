@@ -51,4 +51,5 @@ export const cacheKeys = {
   roomActive: (roomCode: string) => `room-active:v2:${roomCode}`,
   userRooms: (userId: string) => `rooms:user:${userId}`,
   todos: (userId: string) => `todos:${userId}`,
+  activeSession: (email: string) => `active-session:${email}`,
 };

@@ -1,5 +1,5 @@
 import { authOptions } from "@/app/lib/auth";
-import { cache } from "@/app/lib/cache";
+import { cache, cacheKeys } from "@/app/lib/cache";
 import {
   handleApiError,
   NotFoundError,
@@ -8,6 +8,7 @@ import {
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
 import { pusherServer } from "@/app/lib/pusher";
+import { roomChannel } from "@/app/lib/pusher-channels";
 import {
   createRateLimitResponse,
   rateLimiters,
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    await cache.del(`active-session:${session.user.email}`);
+    await cache.del(cacheKeys.activeSession(session.user.email));
 
     const memberships = await prisma.roomMember.findMany({
       where: {
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     for (const member of memberships) {
       await pusherServer.trigger(
-        `room-${member.room.code}`,
+        roomChannel(member.room.code),
         "session-resumed",
         {
           userId: user.id,

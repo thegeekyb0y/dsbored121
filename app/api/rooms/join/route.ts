@@ -4,6 +4,7 @@ import {
   handleApiError,
   NotFoundError,
   UnauthorizedError,
+  ValidationError,
   validate,
 } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
@@ -13,6 +14,7 @@ import {
   rateLimiters,
   withRateLimit,
 } from "@/app/lib/rate-limit";
+import { ROOM_CODE_PATTERN, normalizeRoomCode } from "@/app/lib/room-code";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -36,12 +38,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validated = validate<{ roomCode: string }>(body, {
-      roomCode: { type: "string", required: true, min: 6, max: 6 },
+    const parsed = validate<{ roomCode: string }>(body, {
+      roomCode: { type: "string", required: true, min: 1 },
     });
 
+    const roomCode = normalizeRoomCode(parsed.roomCode);
+    if (!ROOM_CODE_PATTERN.test(roomCode)) {
+      throw new ValidationError("Invalid room code");
+    }
+
     const room = await prisma.room.findUnique({
-      where: { code: validated.roomCode },
+      where: { code: roomCode },
     });
 
     if (!room) {
@@ -69,7 +76,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: "Already a member",
-          roomCode: validated.roomCode,
+          roomCode,
         },
         { status: 200, headers }
       );
@@ -84,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     await Promise.all([
       cache.del(cacheKeys.userRooms(user.id)),
-      cache.del(cacheKeys.roomData(validated.roomCode)),
+      cache.del(cacheKeys.roomData(roomCode)),
     ]);
 
     const elapsed = Date.now() - startTime;
@@ -93,7 +100,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         message: "Joined room successfully",
-        roomCode: validated.roomCode,
+        roomCode,
       },
       { headers }
     );
