@@ -15,7 +15,7 @@ import {
   handleApiError,
   NotFoundError,
   UnauthorizedError,
-  validate,
+  validateStrict,
 } from "@/app/lib/errors";
 import { generateRoomCode } from "@/app/lib/room-code";
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    const validatedData = validate<{ roomName: string }>(data, {
+    const validatedData = validateStrict<{ roomName: string }>(data, {
       roomName: { type: "string", required: true, min: 1, max: 100 },
     });
 

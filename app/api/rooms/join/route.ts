@@ -5,7 +5,7 @@ import {
   NotFoundError,
   UnauthorizedError,
   ValidationError,
-  validate,
+  validateStrict,
 } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
@@ -55,8 +55,8 @@ export async function POST(request: NextRequest) {
     const headers = userOutcome.headers;
 
     const body = await request.json();
-    const parsed = validate<{ roomCode: string }>(body, {
-      roomCode: { type: "string", required: true, min: 1 },
+    const parsed = validateStrict<{ roomCode: string }>(body, {
+      roomCode: { type: "string", required: true, min: 1, max: 12 },
     });
 
     const roomCode = normalizeRoomCode(parsed.roomCode);

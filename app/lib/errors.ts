@@ -118,6 +118,131 @@ export function handleApiError(error: unknown): NextResponse {
   );
 }
 
+// Strict validation: rejects unknown keys, trims strings and returns only the
+// cleaned values. Dependency-free by design.
+export type StrictRule = {
+  type: "string" | "number" | "boolean" | "date";
+  required?: boolean;
+  nullable?: boolean;
+  min?: number;
+  max?: number;
+  pattern?: RegExp;
+  values?: readonly string[];
+};
+
+export function validateStrict<T extends Record<string, unknown>>(
+  data: unknown,
+  schema: Record<string, StrictRule>
+): T {
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    throw new ValidationError("Invalid data: expected an object");
+  }
+
+  const input = data as Record<string, unknown>;
+  const unknownKeys = Object.keys(input).filter((key) => !(key in schema));
+  if (unknownKeys.length > 0) {
+    throw new ValidationError(`Unknown field(s): ${unknownKeys.join(", ")}`);
+  }
+
+  const cleaned: Record<string, unknown> = {};
+
+  for (const [key, rule] of Object.entries(schema)) {
+    const raw = input[key];
+
+    if (raw === undefined) {
+      if (rule.required) {
+        throw new ValidationError(`${key} is required`);
+      }
+      continue;
+    }
+
+    if (raw === null) {
+      if (rule.nullable) {
+        cleaned[key] = null;
+        continue;
+      }
+      if (rule.required) {
+        throw new ValidationError(`${key} is required`);
+      }
+      continue;
+    }
+
+    if (rule.type === "string") {
+      if (typeof raw !== "string") {
+        throw new ValidationError(`${key} must be a string`);
+      }
+      const value = raw.trim();
+      if (value.length === 0) {
+        if (rule.required) {
+          throw new ValidationError(`${key} is required`);
+        }
+        if ((rule.min ?? 0) > 0) {
+          throw new ValidationError(
+            `${key} must be at least ${rule.min} characters`
+          );
+        }
+        cleaned[key] = "";
+        continue;
+      }
+      if (rule.min !== undefined && value.length < rule.min) {
+        throw new ValidationError(
+          `${key} must be at least ${rule.min} characters`
+        );
+      }
+      if (rule.max !== undefined && value.length > rule.max) {
+        throw new ValidationError(
+          `${key} must be at most ${rule.max} characters`
+        );
+      }
+      if (rule.pattern && !rule.pattern.test(value)) {
+        throw new ValidationError(`${key} has an invalid format`);
+      }
+      if (rule.values && !rule.values.includes(value)) {
+        throw new ValidationError(
+          `${key} must be one of: ${rule.values.join(", ")}`
+        );
+      }
+      cleaned[key] = value;
+      continue;
+    }
+
+    if (rule.type === "number") {
+      if (typeof raw !== "number" || Number.isNaN(raw)) {
+        throw new ValidationError(`${key} must be a number`);
+      }
+      if (rule.min !== undefined && raw < rule.min) {
+        throw new ValidationError(`${key} must be at least ${rule.min}`);
+      }
+      if (rule.max !== undefined && raw > rule.max) {
+        throw new ValidationError(`${key} must be at most ${rule.max}`);
+      }
+      cleaned[key] = raw;
+      continue;
+    }
+
+    if (rule.type === "boolean") {
+      if (typeof raw !== "boolean") {
+        throw new ValidationError(`${key} must be a boolean`);
+      }
+      cleaned[key] = raw;
+      continue;
+    }
+
+    if (rule.type === "date") {
+      if (typeof raw !== "string") {
+        throw new ValidationError(`${key} must be an ISO date string`);
+      }
+      const parsed = new Date(raw);
+      if (Number.isNaN(parsed.getTime())) {
+        throw new ValidationError(`${key} must be a valid date`);
+      }
+      cleaned[key] = parsed;
+    }
+  }
+
+  return cleaned as T;
+}
+
 // Wrapper for API route handlers
 // FIXED: Changed 'any' to 'Record<string, unknown>'
 export function withErrorHandler(
