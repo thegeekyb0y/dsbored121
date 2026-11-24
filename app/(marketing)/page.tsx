@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { ArrowRight } from "lucide-react";
 import { LandingAppBar } from "../components/LandingAppBar";
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform } from "motion/react";
 import { StickyScroll } from "../components/StickyScroll";
 
 // Define the content for the Sticky Scroll here
