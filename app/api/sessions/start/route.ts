@@ -4,7 +4,7 @@ import {
   handleApiError,
   NotFoundError,
   UnauthorizedError,
-  validate,
+  validateStrict,
 } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import prisma from "@/app/lib/prisma";
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validatedData = validate<{ tag: string }>(body, {
+    const validatedData = validateStrict<{ tag: string }>(body, {
       tag: {
         type: "string",
         required: true,
