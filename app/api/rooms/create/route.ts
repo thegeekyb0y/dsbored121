@@ -16,6 +16,7 @@ import {
   UnauthorizedError,
   validate,
 } from "@/app/lib/errors";
+import { generateRoomCode } from "@/app/lib/room-code";
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -52,15 +53,6 @@ export async function POST(request: NextRequest) {
     const validatedData = validate<{ roomName: string }>(data, {
       roomName: { type: "string", required: true, min: 1, max: 100 },
     });
-
-    function generateRoomCode() {
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-      let code = "";
-      for (let i = 0; i < 6; i++) {
-        code += chars[Math.floor(Math.random() * chars.length)];
-      }
-      return code;
-    }
 
     let roomCode = generateRoomCode();
     let existing = await prisma.room.findUnique({ where: { code: roomCode } });
