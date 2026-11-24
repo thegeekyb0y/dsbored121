@@ -13,10 +13,11 @@ export const rateLimiters = {
     prefix: "@upstash/ratelimit/auth",
   }),
 
-  // NextAuth POST only: 30/min per IP.
+  // NextAuth POST only: 120/min per IP (a shared campus NAT must not lock out
+  // a whole cohort). GET session polling is never limited.
   authIp: new Ratelimit({
     redis,
-    limiter: Ratelimit.slidingWindow(30, "1 m"),
+    limiter: Ratelimit.slidingWindow(120, "1 m"),
     analytics: true,
     prefix: "@upstash/ratelimit/auth-ip",
   }),
@@ -49,7 +50,8 @@ export const rateLimiters = {
     prefix: "@upstash/ratelimit/rooms",
   }),
 
-  // Join is the room-code oracle: 10/min per user and per IP, fail closed.
+  // Join is the room-code oracle: 10/min per user, 100/min per IP (shared
+  // campus networks put many students behind one address), fail closed.
   joinUser: new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(10, "1 m"),
@@ -59,7 +61,7 @@ export const rateLimiters = {
 
   joinIp: new Ratelimit({
     redis,
-    limiter: Ratelimit.slidingWindow(10, "1 m"),
+    limiter: Ratelimit.slidingWindow(100, "1 m"),
     analytics: true,
     prefix: "@upstash/ratelimit/join-ip",
   }),
