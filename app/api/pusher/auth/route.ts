@@ -6,16 +6,14 @@ import {
 } from "@/app/lib/errors";
 import { logger } from "@/app/lib/logger";
 import { pusherServer } from "@/app/lib/pusher";
-import {
-  ROOM_CHANNEL_PREFIX,
-  ROOM_CODE_PATTERN,
-} from "@/app/lib/pusher-channels";
+import { ROOM_CHANNEL_PREFIX } from "@/app/lib/pusher-channels";
 import {
   createRateLimitResponse,
   rateLimiters,
   withRateLimit,
 } from "@/app/lib/rate-limit";
 import { requireRoomMember } from "@/app/lib/room-access";
+import { ROOM_CODE_PATTERN } from "@/app/lib/room-code";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
