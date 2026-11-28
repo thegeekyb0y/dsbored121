@@ -6,8 +6,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-lexend);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   --color-krakedgreen: #053a0d;
   --color-krakedgreen2: #0f641c;
   --color-krakedpurple: #413d4d;
@@ -46,6 +47,59 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  /* Semantic surface + text tokens (phase 1 of the redesign). */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-accent-brand: var(--accent-brand);
+  --color-accent-brand-2: var(--accent-brand-2);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-focus: var(--focus);
+
+  /* Radii: 12 / 20 / 28 / pill. */
+  --radius-card: 0.75rem;
+  --radius-panel: 1.25rem;
+  --radius-hero: 1.75rem;
+  --radius-pill: 9999px;
+
+  /* Elevation. */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px -16px rgb(0 0 0 / 0.35);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.08), 0 16px 40px -20px rgb(0 0 0 / 0.45);
+  --shadow-focus: 0 0 0 2px var(--focus);
+
+  /* Motion. */
+  --duration-press: 140ms;
+  --duration-ui: 180ms;
+  --duration-reveal: 520ms;
+  --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Layout. */
+  --container-content: 75.5rem;
+  --container-wide: 67.5rem;
+
+  /* Type scale. */
+  --text-display-1: clamp(3rem, 6vw, 6.625rem);
+  --text-display-1--line-height: 0.95;
+  --text-display-2: clamp(2rem, 4vw, 3.5rem);
+  --text-display-2--line-height: 1.03;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.2;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.7;
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.4;
+  --text-mono: 0.8125rem;
+  --text-mono--line-height: 1.5;
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -54,6 +108,25 @@
 
 :root {
   --radius: 0.625rem;
+  /* Light theme is the design target. Phase 1 keeps <html class="dark"> on the
+     root until component surfaces are migrated, so shipping this changes no
+     pixels while the token layer lands. */
+  --bg: #fbf9f5;
+  --surface: #ffffff;
+  --surface-2: #f4f1ea;
+  --surface-3: #ece7dd;
+  --line: #e2ddd2;
+  --line-strong: #cfc8b8;
+  --text: #17161a;
+  --text-2: #4a484f;
+  --text-3: #7c7a83;
+  --accent-brand: #053a0d;
+  --accent-brand-2: #d89a42;
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --focus: #3b82c6;
+  color-scheme: light;
   --background: #131212;
   --foreground: #ededed;
   --card: oklch(1 0 0);
@@ -119,6 +192,23 @@
   --sidebar-accent-foreground: oklch(0.985 0.002 247.839);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  /* Dark counterparts for the semantic tokens above. */
+  --bg: #131212;
+  --surface: #1b1a1a;
+  --surface-2: #232121;
+  --surface-3: #2c2a2a;
+  --line: rgb(255 255 255 / 0.1);
+  --line-strong: rgb(255 255 255 / 0.18);
+  --text: #f2f1ef;
+  --text-2: #b9b6b1;
+  --text-3: #8a8783;
+  --accent-brand: #0f641c;
+  --accent-brand-2: #d89a42;
+  --success: #4ade80;
+  --warning: #f0b429;
+  --danger: #f87171;
+  --focus: #3b82c6;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -126,6 +216,6 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-bg text-text font-sans;
   }
 }

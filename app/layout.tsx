@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Lexend_Deca } from "next/font/google";
+import { Lexend_Deca, Manrope } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./provider";
 import { Analytics } from "@vercel/analytics/next";
@@ -8,6 +8,13 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 const Lexend = Lexend_Deca({
   weight: "300",
   subsets: ["latin"],
+  variable: "--font-lexend",
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-manrope",
 });
 
 export const metadata: Metadata = {
@@ -54,8 +61,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${Lexend.className} antialiased bg-black text-white`}>
+    <html lang="en" className="dark">
+      <body
+        className={`${manrope.variable} ${Lexend.variable} font-sans antialiased`}
+      >
         <Providers>
           {children}
           <Analytics />
