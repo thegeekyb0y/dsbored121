@@ -7,9 +7,9 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
   },
-  engine: "classic",
+  // CLI and migrations connect directly; the app uses the pooled URL through
+  // the pg driver adapter in app/lib/prisma.ts.
   datasource: {
-    url: env("DATABASE_URL"),
-    directUrl: env("DATABASE_URL_UNPOOLED"),
+    url: env("DATABASE_URL_UNPOOLED"),
   },
 });

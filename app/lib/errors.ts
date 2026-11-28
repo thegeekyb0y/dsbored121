@@ -1,7 +1,7 @@
 // app/lib/errors.ts
 import { NextResponse } from "next/server";
 import { logger } from "./logger";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/app/generated/prisma/client";
 
 export class AppError extends Error {
   constructor(
